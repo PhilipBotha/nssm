@@ -1,7 +1,8 @@
+#include <vector>
 #include "nssm.h"
-
+#include "helper.h"
 typedef struct {
-  TCHAR *name;
+  const TCHAR *name;
   HANDLE process_handle;
   unsigned long pid;
   unsigned long deadline;
@@ -34,7 +35,8 @@ static unsigned long WINAPI await_hook(void *arg) {
 
   if (ret) {
     CloseHandle(hook->process_handle);
-    if (hook->name) HeapFree(GetProcessHeap(), 0, hook->name);
+    auto name {nssm::getVec(hook->name)};
+    if (hook->name) HeapFree(GetProcessHeap(), 0, name.data());
     HeapFree(GetProcessHeap(), 0, hook);
     return ret;
   }
@@ -42,8 +44,8 @@ static unsigned long WINAPI await_hook(void *arg) {
   unsigned long exitcode;
   GetExitCodeProcess(hook->process_handle, &exitcode);
   CloseHandle(hook->process_handle);
-
-  if (hook->name) HeapFree(GetProcessHeap(), 0, hook->name);
+  auto hname{nssm::getVec(hook->name)};
+  if (hook->name) HeapFree(GetProcessHeap(), 0, hname.data());
   HeapFree(GetProcessHeap(), 0, hook);
 
   if (exitcode == NSSM_HOOK_STATUS_ABORT) return NSSM_HOOK_STATUS_ABORT;
@@ -74,7 +76,7 @@ static void set_hook_runtime(TCHAR *v, FILETIME *start, FILETIME *now) {
   SetEnvironmentVariable(v, _T(""));
 }
 
-static void add_thread_handle(hook_thread_t *hook_threads, HANDLE thread_handle, TCHAR *name) {
+static void add_thread_handle(hook_thread_t *hook_threads, HANDLE thread_handle, const TCHAR *name) {
   if (! hook_threads) return;
 
   int num_threads = hook_threads->num_threads + 1;
@@ -357,8 +359,9 @@ int nssm_hook(hook_thread_t *hook_threads, nssm_service_t *service, TCHAR *hook_
   ret = NSSM_HOOK_STATUS_NOTRUN;
   if (CreateProcess(0, cmd, 0, 0, inherit_handles, flags, 0, service->dir, &si, &pi)) {
     close_output_handles(&si);
-    hook->name = (TCHAR *) HeapAlloc(GetProcessHeap(), 0, HOOK_NAME_LENGTH * sizeof(TCHAR));
-    if (hook->name) _sntprintf_s(hook->name, HOOK_NAME_LENGTH, _TRUNCATE, _T("%s (%s/%s)"), service->name, hook_event, hook_action);
+    TCHAR* hname = (TCHAR *) HeapAlloc(GetProcessHeap(), 0, HOOK_NAME_LENGTH * sizeof(TCHAR));
+    if (hook->name) _sntprintf_s(hname, HOOK_NAME_LENGTH, _TRUNCATE, _T("%s (%s/%s)"), service->name, hook_event, hook_action);
+    hook->name = hname;
     hook->process_handle = pi.hProcess;
     hook->pid = pi.dwProcessId;
     hook->deadline = deadline;
@@ -383,7 +386,8 @@ int nssm_hook(hook_thread_t *hook_threads, nssm_service_t *service, TCHAR *hook_
     else {
       log_event(EVENTLOG_ERROR_TYPE, NSSM_EVENT_CREATETHREAD_FAILED, error_string(GetLastError()), 0);
       await_hook(hook);
-      if (hook->name) HeapFree(GetProcessHeap(), 0, hook->name);
+      auto name{nssm::getVec(hook->name)};
+      if (hook->name) HeapFree(GetProcessHeap(), 0, name.data());
       HeapFree(GetProcessHeap(), 0, hook);
     }
   }

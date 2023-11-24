@@ -55,7 +55,9 @@ if (BUILD_TYPE_ID STREQUAL "release")
 endif (BUILD_TYPE_ID STREQUAL "release")
 
 set(CMAKE_CXX_STANDARD 20)
-set(SOURCES account.cpp console.cpp env.cpp event.cpp gui.cpp hook.cpp imports.cpp io.cpp nssm.cpp process.cpp registry.cpp service.cpp settings.cpp utf8.cpp)
+set(SOURCES account.cpp console.cpp env.cpp event.cpp gui.cpp hook.cpp imports.cpp io.cpp nssm.cpp process.cpp registry.cpp service.cpp settings.cpp utf8.cpp
+        helper.cpp)
 
 add_executable(${PROJECT_NAME} ${SOURCES})
+target_link_libraries(${PROJECT_NAME} -lshlwapi)
 

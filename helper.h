@@ -9,6 +9,9 @@
 #include <array>
 #include <type_traits>
 #include <Windows.h>
+#include <vector>
+#include <string>
+#include <ntsecapi.h>
 
 namespace nssm {
 
@@ -38,6 +41,11 @@ namespace nssm {
             .Buffer = arArray.data()
         };
     }
+
+    /// Return vector of the string including the null terminator.
+    /// \param apNullTermString
+    /// \return Null terminated vector containing the string.
+    [[nodiscard]] std::vector<TCHAR> getVec(const TCHAR * const apNullTermString);
 }
 
 #endif //NSSM_HELPER_H

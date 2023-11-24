@@ -244,7 +244,7 @@ int affinity_string_to_mask(TCHAR *string, __int64 *mask) {
   }
 
   for (i = 0; i <= n; i++) {
-    for (int j = set[i].first; j <= set[i].last; j++) (std::int64_t) *mask |= (1LL << (std::int64_t) j);
+    for (int j = set[i].first; j <= set[i].last; j++) *mask |= (1LL << (std::int64_t) j);
   }
 
   return 0;
@@ -2213,7 +2213,7 @@ int await_single_handle(SERVICE_STATUS_HANDLE status_handle, SERVICE_STATUS *sta
   TCHAR interval_milliseconds[16];
   TCHAR timeout_milliseconds[16];
   TCHAR waited_milliseconds[16];
-  TCHAR * const function = function_name;
+  const TCHAR * function = function_name;
 
   /* Add brackets to function name. */
   size_t funclen = _tcslen(function_name) + 3;

@@ -5,7 +5,7 @@
 #include <tlhelp32.h>
 
 typedef struct {
-  TCHAR *name;
+  const TCHAR *name;
   HANDLE process_handle;
   unsigned long depth;
   unsigned long pid;

@@ -51,7 +51,7 @@ static int value_from_string(const TCHAR *name, value_t *value, const TCHAR *str
 }
 
 /* Functions to manage NSSM-specific settings in the registry. */
-static int setting_set_number(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+static int setting_set_number(const TCHAR *service_name, void *param, const TCHAR *name, const void *default_value, value_t *value, const TCHAR *additional) {
   HKEY key = (HKEY) param;
   if (! key) return -1;
 
@@ -79,12 +79,12 @@ static int setting_set_number(const TCHAR *service_name, void *param, const TCHA
   return 1;
 }
 
-static int setting_get_number(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+static int setting_get_number(const TCHAR *service_name, void *param, const TCHAR *name, const void *default_value, value_t *value, const TCHAR *additional) {
   HKEY key = (HKEY) param;
   return get_number(key, (TCHAR *) name, &value->numeric, false);
 }
 
-static int setting_set_string(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+static int setting_set_string(const TCHAR *service_name, void *param, const TCHAR *name, const void *default_value, value_t *value, const TCHAR *additional) {
   HKEY key = (HKEY) param;
   if (! key) return -1;
 
@@ -112,7 +112,7 @@ static int setting_set_string(const TCHAR *service_name, void *param, const TCHA
   return 1;
 }
 
-static int setting_get_string(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+static int setting_get_string(const TCHAR *service_name, void *param, const TCHAR *name, const void *default_value, value_t *value, const TCHAR *additional) {
   HKEY key = (HKEY) param;
   TCHAR buffer[VALUE_LENGTH];
 
@@ -121,7 +121,7 @@ static int setting_get_string(const TCHAR *service_name, void *param, const TCHA
   return value_from_string(name, value, buffer);
 }
 
-static int setting_not_dumpable(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+static int setting_not_dumpable(const TCHAR *service_name, void *param, const TCHAR *name, const void *default_value, value_t *value, const TCHAR *additional) {
   return 0;
 }
 
@@ -157,7 +157,7 @@ static int setting_dump_string(const TCHAR *service_name, void *param, const TCH
   return 0;
 }
 
-static int setting_set_exit_action(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+static int setting_set_exit_action(const TCHAR *service_name, void *param, const TCHAR *name, const void *default_value, value_t *value, const TCHAR *additional) {
   unsigned long exitcode;
   TCHAR *code;
   TCHAR action_string[ACTION_LEN];
@@ -216,7 +216,7 @@ static int setting_set_exit_action(const TCHAR *service_name, void *param, const
   return -1;
 }
 
-static int setting_get_exit_action(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+static int setting_get_exit_action(const TCHAR *service_name, void *param, const TCHAR *name, const void *default_value, value_t *value, const TCHAR *additional) {
   unsigned long exitcode = 0;
   unsigned long *code = 0;
 
@@ -237,7 +237,7 @@ static int setting_get_exit_action(const TCHAR *service_name, void *param, const
   return 1;
 }
 
-static int setting_dump_exit_action(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+static int setting_dump_exit_action(const TCHAR *service_name, void *param, const TCHAR *name, const void *default_value, value_t *value, const TCHAR *additional) {
   int errors = 0;
   HKEY key = open_registry(service_name, NSSM_REG_EXIT, KEY_READ);
   if (! key) return -1;
@@ -288,7 +288,7 @@ static inline bool split_hook_name(const TCHAR *hook_name, TCHAR *hook_event, TC
   return false;
 }
 
-static int setting_set_hook(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+static int setting_set_hook(const TCHAR *service_name, void *param, const TCHAR *name, const void *default_value, value_t *value, const TCHAR *additional) {
   TCHAR hook_event[HOOK_NAME_LENGTH];
   TCHAR hook_action[HOOK_NAME_LENGTH];
   if (! split_hook_name(additional, hook_event, hook_action)) return -1;
@@ -302,7 +302,7 @@ static int setting_set_hook(const TCHAR *service_name, void *param, const TCHAR 
   return 1;
 }
 
-static int setting_get_hook(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+static int setting_get_hook(const TCHAR *service_name, void *param, const TCHAR *name, const void *default_value, value_t *value, const TCHAR *additional) {
   TCHAR hook_event[HOOK_NAME_LENGTH];
   TCHAR hook_action[HOOK_NAME_LENGTH];
   if (! split_hook_name(additional, hook_event, hook_action)) return -1;
@@ -316,7 +316,7 @@ static int setting_get_hook(const TCHAR *service_name, void *param, const TCHAR 
   return 1;
 }
 
-static int setting_dump_hooks(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+static int setting_dump_hooks(const TCHAR *service_name, void *param, const TCHAR *name, const void *default_value, value_t *value, const TCHAR *additional) {
   int i, j;
 
   int errors = 0;
@@ -343,7 +343,7 @@ static int setting_dump_hooks(const TCHAR *service_name, void *param, const TCHA
   return 0;
 }
 
-static int setting_set_affinity(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+static int setting_set_affinity(const TCHAR *service_name, void *param, const TCHAR *name, const void *default_value, value_t *value, const TCHAR *additional) {
   HKEY key = (HKEY) param;
   if (! key) return -1;
 
@@ -400,7 +400,7 @@ static int setting_set_affinity(const TCHAR *service_name, void *param, const TC
   return 1;
 }
 
-static int setting_get_affinity(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+static int setting_get_affinity(const TCHAR *service_name, void *param, const TCHAR *name, const void *default_value, value_t *value, const TCHAR *additional) {
   HKEY key = (HKEY) param;
   if (! key) return -1;
 
@@ -448,7 +448,7 @@ static int setting_get_affinity(const TCHAR *service_name, void *param, const TC
   return ret;
 }
 
-static int setting_set_environment(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+static int setting_set_environment(const TCHAR *service_name, void *param, const TCHAR *name, const void *default_value, value_t *value, const TCHAR *additional) {
   HKEY key = (HKEY) param;
   if (! param) return -1;
 
@@ -517,7 +517,7 @@ static int setting_set_environment(const TCHAR *service_name, void *param, const
   return 1;
 }
 
-static int setting_get_environment(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+static int setting_get_environment(const TCHAR *service_name, void *param, const TCHAR *name, const void *default_value, value_t *value, const TCHAR *additional) {
   HKEY key = (HKEY) param;
   if (! param) return -1;
 
@@ -559,7 +559,7 @@ static int setting_get_environment(const TCHAR *service_name, void *param, const
   return ret;
 }
 
-static int setting_dump_environment(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+static int setting_dump_environment(const TCHAR *service_name, void *param, const TCHAR *name, const void *default_value, value_t *value, const TCHAR *additional) {
   int errors = 0;
   HKEY key = (HKEY) param;
   if (! param) return -1;
@@ -592,7 +592,7 @@ static int setting_dump_environment(const TCHAR *service_name, void *param, cons
   return 0;
 }
 
-static int setting_set_priority(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+static int setting_set_priority(const TCHAR *service_name, void *param, const TCHAR *name, const void *default_value, value_t *value, const TCHAR *additional) {
   HKEY key = (HKEY) param;
   if (! param) return -1;
 
@@ -629,7 +629,7 @@ static int setting_set_priority(const TCHAR *service_name, void *param, const TC
   return -1;
 }
 
-static int setting_get_priority(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+static int setting_get_priority(const TCHAR *service_name, void *param, const TCHAR *name, const void *default_value, value_t *value, const TCHAR *additional) {
   HKEY key = (HKEY) param;
   if (! param) return -1;
 
@@ -644,7 +644,7 @@ static int setting_get_priority(const TCHAR *service_name, void *param, const TC
   return value_from_string(name, value, priority_strings[priority_constant_to_index(constant)]);
 }
 
-static int setting_dump_priority(const TCHAR *service_name, void *key_ptr, const TCHAR *name, void *setting_ptr, value_t *value, const TCHAR *additional) {
+static int setting_dump_priority(const TCHAR *service_name, void *key_ptr, const TCHAR *name, const void *setting_ptr, value_t *value, const TCHAR *additional) {
   settings_t *setting = (settings_t *) setting_ptr;
   int ret = setting_get_priority(service_name, key_ptr, name, (void *) setting->default_value, value, 0);
   if (ret != 1) return ret;
@@ -738,7 +738,7 @@ static int native_set_dependon(const TCHAR *service_name, SC_HANDLE service_hand
   return 0;
 }
 
-static int native_set_dependongroup(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+static int native_set_dependongroup(const TCHAR *service_name, void *param, const TCHAR *name, const void *default_value, value_t *value, const TCHAR *additional) {
   SC_HANDLE service_handle = (SC_HANDLE) param;
   if (! service_handle) return -1;
 
@@ -789,7 +789,7 @@ static int native_set_dependongroup(const TCHAR *service_name, void *param, cons
   return ret;
 }
 
-static int native_get_dependongroup(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+static int native_get_dependongroup(const TCHAR *service_name, void *param, const TCHAR *name, const void *default_value, value_t *value, const TCHAR *additional) {
   SC_HANDLE service_handle = (SC_HANDLE) param;
   if (! service_handle) return -1;
 
@@ -849,11 +849,11 @@ static int setting_dump_dependon(const TCHAR *service_name, SC_HANDLE service_ha
   return 0;
 }
 
-static int native_dump_dependongroup(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+static int native_dump_dependongroup(const TCHAR *service_name, void *param, const TCHAR *name, const void *default_value, value_t *value, const TCHAR *additional) {
   return setting_dump_dependon(service_name, (SC_HANDLE) param, name, DEPENDENCY_GROUPS, value);
 }
 
-static int native_set_dependonservice(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+static int native_set_dependonservice(const TCHAR *service_name, void *param, const TCHAR *name, const void *default_value, value_t *value, const TCHAR *additional) {
   SC_HANDLE service_handle = (SC_HANDLE) param;
   if (! service_handle) return -1;
 
@@ -904,7 +904,7 @@ static int native_set_dependonservice(const TCHAR *service_name, void *param, co
   return ret;
 }
 
-static int native_get_dependonservice(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+static int native_get_dependonservice(const TCHAR *service_name, void *param, const TCHAR *name, const void *default_value, value_t *value, const TCHAR *additional) {
   SC_HANDLE service_handle = (SC_HANDLE) param;
   if (! service_handle) return -1;
 
@@ -933,11 +933,11 @@ static int native_get_dependonservice(const TCHAR *service_name, void *param, co
   return ret;
 }
 
-static int native_dump_dependonservice(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+static int native_dump_dependonservice(const TCHAR *service_name, void *param, const TCHAR *name, const void *default_value, value_t *value, const TCHAR *additional) {
   return setting_dump_dependon(service_name, (SC_HANDLE) param, name, DEPENDENCY_SERVICES, value);
 }
 
-int native_set_description(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+int native_set_description(const TCHAR *service_name, void *param, const TCHAR *name, const void *default_value, value_t *value, const TCHAR *additional) {
   SC_HANDLE service_handle = (SC_HANDLE) param;
   if (! service_handle) return -1;
 
@@ -950,7 +950,7 @@ int native_set_description(const TCHAR *service_name, void *param, const TCHAR *
   return 0;
 }
 
-int native_get_description(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+int native_get_description(const TCHAR *service_name, void *param, const TCHAR *name, const void * default_value, value_t *value, const TCHAR *additional) {
   SC_HANDLE service_handle = (SC_HANDLE) param;
   if (! service_handle) return -1;
 
@@ -963,7 +963,7 @@ int native_get_description(const TCHAR *service_name, void *param, const TCHAR *
   return 0;
 }
 
-int native_set_displayname(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+int native_set_displayname(const TCHAR *service_name, void *param, const TCHAR *name, const void * default_value, value_t *value, const TCHAR *additional) {
   SC_HANDLE service_handle = (SC_HANDLE) param;
   if (! service_handle) return -1;
 
@@ -987,7 +987,7 @@ int native_set_displayname(const TCHAR *service_name, void *param, const TCHAR *
   return 0;
 }
 
-int native_get_displayname(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+int native_get_displayname(const TCHAR *service_name, void *param, const TCHAR *name, const void * default_value, value_t *value, const TCHAR *additional) {
   SC_HANDLE service_handle = (SC_HANDLE) param;
   if (! service_handle) return -1;
 
@@ -1000,7 +1000,7 @@ int native_get_displayname(const TCHAR *service_name, void *param, const TCHAR *
   return ret;
 }
 
-int native_set_environment(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+int native_set_environment(const TCHAR *service_name, void *param, const TCHAR *name, const void * default_value, value_t *value, const TCHAR *additional) {
   HKEY key = open_service_registry(service_name, KEY_SET_VALUE, true);
   if (! key) return -1;
 
@@ -1009,7 +1009,7 @@ int native_set_environment(const TCHAR *service_name, void *param, const TCHAR *
   return ret;
 }
 
-int native_get_environment(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+int native_get_environment(const TCHAR *service_name, void *param, const TCHAR *name, const void * default_value, value_t *value, const TCHAR *additional) {
   HKEY key = open_service_registry(service_name, KEY_READ, true);
   if (! key) return -1;
 
@@ -1019,7 +1019,7 @@ int native_get_environment(const TCHAR *service_name, void *param, const TCHAR *
   return ret;
 }
 
-static int native_dump_environment(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+static int native_dump_environment(const TCHAR *service_name, void *param, const TCHAR *name, const void * default_value, value_t *value, const TCHAR *additional) {
   HKEY key = open_service_registry(service_name, KEY_READ, true);
   if (! key) return -1;
 
@@ -1028,7 +1028,7 @@ static int native_dump_environment(const TCHAR *service_name, void *param, const
   return ret;
 }
 
-int native_set_imagepath(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+int native_set_imagepath(const TCHAR *service_name, void *param, const TCHAR *name, const void * default_value, value_t *value, const TCHAR *additional) {
   SC_HANDLE service_handle = (SC_HANDLE) param;
   if (! service_handle) return -1;
 
@@ -1046,7 +1046,7 @@ int native_set_imagepath(const TCHAR *service_name, void *param, const TCHAR *na
   return 1;
 }
 
-int native_get_imagepath(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+int native_get_imagepath(const TCHAR *service_name, void *param, const TCHAR *name, const void * default_value, value_t *value, const TCHAR *additional) {
   SC_HANDLE service_handle = (SC_HANDLE) param;
   if (! service_handle) return -1;
 
@@ -1059,16 +1059,16 @@ int native_get_imagepath(const TCHAR *service_name, void *param, const TCHAR *na
   return ret;
 }
 
-int native_set_name(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+int native_set_name(const TCHAR *service_name, void *param, const TCHAR *name, const void * default_value, value_t *value, const TCHAR *additional) {
   print_message(stderr, NSSM_MESSAGE_CANNOT_RENAME_SERVICE);
   return -1;
 }
 
-int native_get_name(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+int native_get_name(const TCHAR *service_name, void *param, const TCHAR *name, const void * default_value, value_t *value, const TCHAR *additional) {
   return value_from_string(name, value, service_name);
 }
 
-int native_set_objectname(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+int native_set_objectname(const TCHAR *service_name, void *param, const TCHAR *name, const void * default_value, value_t *value, const TCHAR *additional) {
   SC_HANDLE service_handle = (SC_HANDLE) param;
   if (! service_handle) return -1;
 
@@ -1138,7 +1138,7 @@ int native_set_objectname(const TCHAR *service_name, void *param, const TCHAR *n
   return 1;
 }
 
-int native_get_objectname(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+int native_get_objectname(const TCHAR *service_name, void *param, const TCHAR *name, const void * default_value, value_t *value, const TCHAR *additional) {
   SC_HANDLE service_handle = (SC_HANDLE) param;
   if (! service_handle) return -1;
 
@@ -1151,7 +1151,7 @@ int native_get_objectname(const TCHAR *service_name, void *param, const TCHAR *n
   return ret;
 }
 
-int native_dump_objectname(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+int native_dump_objectname(const TCHAR *service_name, void *param, const TCHAR *name, const void * default_value, value_t *value, const TCHAR *additional) {
   int ret = native_get_objectname(service_name, param, name, default_value, value, additional);
   if (ret != 1) return ret;
 
@@ -1174,7 +1174,7 @@ int native_dump_objectname(const TCHAR *service_name, void *param, const TCHAR *
   return setting_dump_string(service_name, (void *) REG_SZ, name, value, 0);
 }
 
-int native_set_startup(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+int native_set_startup(const TCHAR *service_name, void *param, const TCHAR *name, const void * default_value, value_t *value, const TCHAR *additional) {
   SC_HANDLE service_handle = (SC_HANDLE) param;
   if (! service_handle) return -1;
 
@@ -1227,7 +1227,7 @@ int native_set_startup(const TCHAR *service_name, void *param, const TCHAR *name
   return 1;
 }
 
-int native_get_startup(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+int native_get_startup(const TCHAR *service_name, void *param, const TCHAR *name, const void * default_value, value_t *value, const TCHAR *additional) {
   SC_HANDLE service_handle = (SC_HANDLE) param;
   if (! service_handle) return -1;
 
@@ -1247,7 +1247,7 @@ int native_get_startup(const TCHAR *service_name, void *param, const TCHAR *name
   return value_from_string(name, value, startup_strings[startup]);
 }
 
-int native_set_type(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+int native_set_type(const TCHAR *service_name, void *param, const TCHAR *name, const void * default_value, value_t *value, const TCHAR *additional) {
   SC_HANDLE service_handle = (SC_HANDLE) param;
   if (! service_handle) return -1;
 
@@ -1295,7 +1295,7 @@ int native_set_type(const TCHAR *service_name, void *param, const TCHAR *name, v
   return 1;
 }
 
-int native_get_type(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
+int native_get_type(const TCHAR *service_name, void *param, const TCHAR *name, const void * default_value, value_t *value, const TCHAR *additional) {
   SC_HANDLE service_handle = (SC_HANDLE) param;
   if (! service_handle) return -1;
 

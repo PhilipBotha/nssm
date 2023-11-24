@@ -28,12 +28,12 @@ typedef union {
   TCHAR *string;
 } value_t;
 
-typedef int (*setting_function_t)(const TCHAR *, void *, const TCHAR *, void *, value_t *, const TCHAR *);
+typedef int (*setting_function_t)(const TCHAR *, void *, const TCHAR *, const void *, value_t *, const TCHAR *);
 
 typedef struct {
   const TCHAR *name;
   unsigned long type;
-  void *default_value;
+  const void *default_value;
   bool native;
   int additional;
   setting_function_t set;
