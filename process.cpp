@@ -1,5 +1,5 @@
 #include "nssm.h"
-
+#include <memory>
 extern imports_t imports;
 
 HANDLE get_debug_token() {

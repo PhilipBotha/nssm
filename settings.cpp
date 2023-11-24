@@ -1,4 +1,7 @@
 #include "nssm.h"
+#include <cstdint>
+#include <windows.h>
+#include <winsvc.h>
 /* XXX: (value && value->string) is probably bogus because value is probably never null */
 
 /* Affinity. */
@@ -138,7 +141,7 @@ static int setting_dump_string(const TCHAR *service_name, void *param, const TCH
   }
   else quoted_additional[0] = _T('\0');
 
-  unsigned long type = (unsigned long) param;
+  const auto type = reinterpret_cast<std::uintptr_t>(param);
   if (is_string_type(type)) {
     if (_tcslen(value->string)) {
       if (quote(value->string, quoted_value, _countof(quoted_value))) return 2;
@@ -255,7 +258,7 @@ static int setting_dump_exit_action(const TCHAR *service_name, void *param, cons
     }
     if (! valid) continue;
 
-    TCHAR *additional = (code[i]) ? code : NSSM_DEFAULT_STRING;
+    const TCHAR * const additional = (code[i]) ? code : NSSM_DEFAULT_STRING;
 
     ret = setting_get_exit_action(service_name, 0, name, default_value, value, additional);
     if (ret == 1) {

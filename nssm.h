@@ -32,7 +32,8 @@
 #endif
 #define DIR_LENGTH PATH_LENGTH - 12
 
-#define _WIN32_WINNT 0x0500
+#define _WIN32_WINNT 0x0A00 //0x0A00 -> Win 10
+
 
 #define APSTUDIO_HIDDEN_SYMBOLS
 #include <windows.h>

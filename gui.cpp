@@ -302,7 +302,7 @@ static inline void set_hook_tab(int event_index, int action_index, bool changed)
   SendMessage(combo, CB_RESETCONTENT, 0, 0);
 
   const TCHAR *hook_event = hook_event_strings[event_index];
-  TCHAR *hook_action;
+  const TCHAR *hook_action;
   int i;
   switch (event_index + first_event) {
     case NSSM_GUI_HOOK_EVENT_ROTATE:
@@ -383,7 +383,7 @@ static inline int update_hooks(TCHAR *service_name) {
   return ret;
 }
 
-static inline void check_io(HWND owner, TCHAR *name, TCHAR *buffer, unsigned long len, unsigned long control) {
+static inline void check_io(HWND owner, const TCHAR *name, TCHAR *buffer, unsigned long len, unsigned long control) {
   if (! SendMessage(GetDlgItem(tablist[NSSM_TAB_IO], control), WM_GETTEXTLENGTH, 0, 0)) return;
   if (GetDlgItemText(tablist[NSSM_TAB_IO], control, buffer, (int) len)) return;
   popup_message(owner, MB_OK | MB_ICONEXCLAMATION, NSSM_MESSAGE_PATH_TOO_LONG, name);
@@ -885,7 +885,7 @@ int edit(HWND window, nssm_service_t *orig_service) {
   return 0;
 }
 
-static TCHAR *browse_filter(int message) {
+static const TCHAR * browse_filter(int message) {
   switch (message) {
     case NSSM_GUI_BROWSE_FILTER_APPLICATIONS: return _T("*.exe;*.bat;*.cmd");
     case NSSM_GUI_BROWSE_FILTER_DIRECTORIES: return _T(".");
@@ -904,7 +904,7 @@ UINT_PTR CALLBACK browse_hook(HWND dlg, UINT message, WPARAM w, LPARAM l) {
 }
 
 /* Browse for application */
-void browse(HWND window, TCHAR *current, unsigned long flags, ...) {
+void browse(HWND window, const TCHAR *current, unsigned long flags, ...) {
   if (! window) return;
 
   va_list arg;
@@ -927,7 +927,7 @@ void browse(HWND window, TCHAR *current, unsigned long flags, ...) {
       _sntprintf_s((TCHAR *) ofn.lpstrFilter + len, bufsize - len, _TRUNCATE, localised);
       len += _tcslen(localised) + 1;
       LocalFree(localised);
-      TCHAR *filter = browse_filter(i);
+      const TCHAR *filter = browse_filter(i);
       _sntprintf_s((TCHAR *) ofn.lpstrFilter + len, bufsize - len, _TRUNCATE, _T("%s"), filter);
       len += _tcslen(filter) + 1;
     }

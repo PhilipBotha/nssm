@@ -1,5 +1,5 @@
 #include "nssm.h"
-
+#include <cstdint>
 bool is_admin;
 bool use_critical_section;
 
@@ -244,7 +244,7 @@ int affinity_string_to_mask(TCHAR *string, __int64 *mask) {
   }
 
   for (i = 0; i <= n; i++) {
-    for (int j = set[i].first; j <= set[i].last; j++) (__int64) *mask |= (1LL << (__int64) j);
+    for (int j = set[i].first; j <= set[i].last; j++) (std::int64_t) *mask |= (1LL << (std::int64_t) j);
   }
 
   return 0;
@@ -1898,7 +1898,8 @@ int start_service(nssm_service_t *service) {
     if (si.dwFlags & STARTF_USESTDHANDLES) inherit_handles = true;
     unsigned long flags = service->priority & priority_mask();
     if (service->affinity) flags |= CREATE_SUSPENDED;
-    if (! service->no_console) flags |= CREATE_NEW_CONSOLE;
+    if (! service->no_console) flags |= CREATE_NEW_CONSOLE;
+
     if (! CreateProcess(0, cmd, 0, 0, inherit_handles, flags, 0, service->dir, &si, &pi)) {
       unsigned long exitcode = 3;
       unsigned long error = GetLastError();
@@ -2205,14 +2206,14 @@ void throttle_restart(nssm_service_t *service) {
            0 if the wait completed.
           -1 on error.
 */
-int await_single_handle(SERVICE_STATUS_HANDLE status_handle, SERVICE_STATUS *status, HANDLE handle, TCHAR *name, TCHAR *function_name, unsigned long timeout) {
+int await_single_handle(SERVICE_STATUS_HANDLE status_handle, SERVICE_STATUS *status, HANDLE handle, const TCHAR *name, const TCHAR *function_name, unsigned long timeout) {
   unsigned long interval;
   unsigned long ret;
   unsigned long waited;
   TCHAR interval_milliseconds[16];
   TCHAR timeout_milliseconds[16];
   TCHAR waited_milliseconds[16];
-  TCHAR *function = function_name;
+  TCHAR * const function = function_name;
 
   /* Add brackets to function name. */
   size_t funclen = _tcslen(function_name) + 3;

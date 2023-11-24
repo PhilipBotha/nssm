@@ -1,7 +1,8 @@
 #include "nssm.h"
-
+#include "helper.h"
 #include <sddl.h>
-
+#include <array>
+#include <string>
 #ifndef STATUS_SUCCESS
 #define STATUS_SUCCESS ERROR_SUCCESS
 #endif
@@ -311,10 +312,9 @@ int grant_logon_as_service(const TCHAR *username) {
   }
 
   /* Check if the SID has the "Log on as a service" right. */
-  LSA_UNICODE_STRING lsa_right;
-  lsa_right.Buffer = NSSM_LOGON_AS_SERVICE_RIGHT;
-  lsa_right.Length = (unsigned short) wcslen(lsa_right.Buffer) * sizeof(wchar_t);
-  lsa_right.MaximumLength = lsa_right.Length + sizeof(wchar_t);
+
+  auto nssm_buffer{nssm::to_array(NSSM_LOGON_AS_SERVICE_RIGHT)};
+  LSA_UNICODE_STRING lsa_right{nssm::getLsa(nssm_buffer)};
 
   LSA_UNICODE_STRING *rights;
   unsigned long count = ~0;

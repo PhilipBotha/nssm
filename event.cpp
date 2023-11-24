@@ -6,7 +6,7 @@
 unsigned long tls_index;
 
 /* Convert error code to error string - must call LocalFree() on return value */
-TCHAR *error_string(unsigned long error) {
+const TCHAR * error_string(unsigned long error) {
   /* Thread-safe buffer */
   TCHAR *error_message = (TCHAR *) TlsGetValue(tls_index);
   if (! error_message) {
