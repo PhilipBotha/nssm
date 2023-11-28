@@ -6,7 +6,7 @@
 #define TIMESTAMP_FORMAT "%04u-%02u-%02u %02u:%02u:%02u.%03u: "
 #define TIMESTAMP_LEN 25
 
-static int dup_handle(HANDLE source_handle, HANDLE *dest_handle_ptr, TCHAR *source_description, TCHAR *dest_description, unsigned long flags) {
+static int dup_handle(HANDLE source_handle, HANDLE *dest_handle_ptr, const TCHAR *source_description, const TCHAR *dest_description, unsigned long flags) {
   if (! dest_handle_ptr) return 1;
 
   if (! DuplicateHandle(GetCurrentProcess(), source_handle, GetCurrentProcess(), dest_handle_ptr, 0, true, flags)) {
@@ -16,7 +16,7 @@ static int dup_handle(HANDLE source_handle, HANDLE *dest_handle_ptr, TCHAR *sour
   return 0;
 }
 
-static int dup_handle(HANDLE source_handle, HANDLE *dest_handle_ptr, TCHAR *source_description, TCHAR *dest_description) {
+static int dup_handle(HANDLE source_handle, HANDLE *dest_handle_ptr, const TCHAR *source_description, const TCHAR *dest_description) {
   return dup_handle(source_handle, dest_handle_ptr, source_description, dest_description, DUPLICATE_SAME_ACCESS);
 }
 
@@ -276,7 +276,7 @@ void rotate_file(TCHAR *service_name, TCHAR *path, unsigned long seconds, unsign
 
   /* Rotate. */
   bool ok = true;
-  TCHAR *function;
+  const TCHAR *function;
   if (copy_and_truncate) {
     function = _T("CopyFile()");
     if (CopyFile(path, rotated, TRUE)) {
@@ -318,7 +318,8 @@ int get_output_handles(nssm_service_t *service, STARTUPINFO *si) {
       return 2;
     }
 
-    inherit_handles = true;
+    inherit_handles = true;
+
   }
 
   /* stdout */
@@ -345,7 +346,8 @@ int get_output_handles(nssm_service_t *service, STARTUPINFO *si) {
 
     if (dup_handle(service->stdout_si, &si->hStdOutput, _T("stdout_si"), _T("stdout"))) close_handle(&service->stdout_thread);
 
-    inherit_handles = true;
+    inherit_handles = true;
+
   }
 
   /* stderr */
@@ -385,7 +387,8 @@ int get_output_handles(nssm_service_t *service, STARTUPINFO *si) {
 
     if (dup_handle(service->stderr_si, &si->hStdError, _T("stderr_si"), _T("stderr"))) close_handle(&service->stderr_thread);
 
-    inherit_handles = true;
+    inherit_handles = true;
+
   }
 
   /*
@@ -544,7 +547,7 @@ static inline int write_timestamp(logger_t *logger, unsigned long charsize, unsi
   wchar_t *utf16;
   unsigned long utf16len;
   if (to_utf16(timestamp, &utf16, &utf16len)) return -1;
-  int ret = try_write(logger, (void *) *utf16, utf16len * sizeof(wchar_t), out, complained);
+  int ret = try_write(logger, reinterpret_cast<void *>(*utf16), utf16len * sizeof(wchar_t), out, complained); ///dodge.
   HeapFree(GetProcessHeap(), 0, utf16);
   return ret;
 }
@@ -662,7 +665,7 @@ unsigned long WINAPI log_and_rotate(void *arg) {
           if (logger->copy_and_truncate) FlushFileBuffers(logger->write_handle);
           close_handle(&logger->write_handle);
           bool ok = true;
-          TCHAR *function;
+          const TCHAR *function;
           if (logger->copy_and_truncate) {
             function = _T("CopyFile()");
             if (CopyFile(logger->path, rotated, TRUE)) {

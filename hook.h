@@ -68,8 +68,8 @@ typedef struct {
 
 bool valid_hook_name(const TCHAR *, const TCHAR *, bool);
 void await_hook_threads(hook_thread_t *, SERVICE_STATUS_HANDLE, SERVICE_STATUS *, unsigned long);
-int nssm_hook(hook_thread_t *, nssm_service_t *, TCHAR *, TCHAR *, unsigned long *, unsigned long, bool);
-int nssm_hook(hook_thread_t *, nssm_service_t *, TCHAR *, TCHAR *, unsigned long *, unsigned long);
-int nssm_hook(hook_thread_t *, nssm_service_t *, TCHAR *, TCHAR *, unsigned long *);
+int nssm_hook(hook_thread_t *hook_threads, nssm_service_t *service, const TCHAR *hook_event, const TCHAR *hook_action, unsigned long *hook_control, unsigned long deadline, bool async);
+int nssm_hook(hook_thread_t *hook_threads, nssm_service_t *service, const TCHAR *hook_event, const TCHAR *hook_action, unsigned long *hook_control, unsigned long deadline);
+int nssm_hook(hook_thread_t *hook_threads, nssm_service_t *service, const TCHAR *hook_event, const TCHAR *hook_action, unsigned long *hook_control);
 
 #endif

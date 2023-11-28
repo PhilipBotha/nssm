@@ -1672,7 +1672,7 @@ int monitor_service(nssm_service_t *service) {
   return 0;
 }
 
-TCHAR *service_control_text(unsigned long control) {
+const TCHAR *service_control_text(unsigned long control) {
   switch (control) {
     /* HACK: there is no SERVICE_CONTROL_START constant */
     case NSSM_SERVICE_CONTROL_START: return _T("START");
@@ -1687,7 +1687,7 @@ TCHAR *service_control_text(unsigned long control) {
   }
 }
 
-TCHAR *service_status_text(unsigned long status) {
+const TCHAR *service_status_text(unsigned long status) {
   switch (status) {
     case SERVICE_STOPPED: return _T("SERVICE_STOPPED");
     case SERVICE_START_PENDING: return _T("SERVICE_START_PENDING");
@@ -1701,7 +1701,7 @@ TCHAR *service_status_text(unsigned long status) {
 }
 
 void log_service_control(TCHAR *service_name, unsigned long control, bool handled) {
-  TCHAR *text = service_control_text(control);
+  const TCHAR *text = service_control_text(control);
   unsigned long event;
 
   if (! text) {

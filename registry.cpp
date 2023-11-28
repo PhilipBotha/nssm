@@ -360,18 +360,18 @@ int expand_parameter(HKEY key, TCHAR *value, TCHAR *data, unsigned long datalen,
   Returns: 0 if it was set.
            1 on error.
 */
-int set_string(HKEY key, TCHAR *value, TCHAR *string, bool expand) {
+int set_string(HKEY key, const TCHAR *value, TCHAR *string, bool expand) {
   unsigned long type = expand ? REG_EXPAND_SZ : REG_SZ;
   if (RegSetValueEx(key, value, 0, type, (const unsigned char *) string, (unsigned long) (_tcslen(string) + 1) * sizeof(TCHAR)) == ERROR_SUCCESS) return 0;
   log_event(EVENTLOG_ERROR_TYPE, NSSM_EVENT_SETVALUE_FAILED, value, error_string(GetLastError()), 0);
   return 1;
 }
 
-int set_string(HKEY key, TCHAR *value, TCHAR *string) {
+int set_string(HKEY key, const TCHAR *value, TCHAR *string) {
   return set_string(key, value, string, false);
 }
 
-int set_expand_string(HKEY key, TCHAR *value, TCHAR *string) {
+int set_expand_string(HKEY key, const TCHAR *value, TCHAR *string) {
   return set_string(key, value, string, true);
 }
 

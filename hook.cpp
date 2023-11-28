@@ -226,7 +226,7 @@ void await_hook_threads(hook_thread_t *hook_threads, SERVICE_STATUS_HANDLE statu
    NSSM_HOOK_STATUS_TIMEOUT  if the hook timed out.
    NSSM_HOOK_STATUS_FAILED   if the hook failed.
 */
-int nssm_hook(hook_thread_t *hook_threads, nssm_service_t *service, TCHAR *hook_event, TCHAR *hook_action, unsigned long *hook_control, unsigned long deadline, bool async) {
+int nssm_hook(hook_thread_t *hook_threads, nssm_service_t *service, const TCHAR *hook_event, const TCHAR *hook_action, unsigned long *hook_control, unsigned long deadline, bool async) {
   int ret = 0;
 
   hook_t *hook = (hook_t *) HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(hook_t));
@@ -408,10 +408,10 @@ int nssm_hook(hook_thread_t *hook_threads, nssm_service_t *service, TCHAR *hook_
   return ret;
 }
 
-int nssm_hook(hook_thread_t *hook_threads, nssm_service_t *service, TCHAR *hook_event, TCHAR *hook_action, unsigned long *hook_control, unsigned long deadline) {
+int nssm_hook(hook_thread_t *hook_threads, nssm_service_t *service, const TCHAR *hook_event, const TCHAR *hook_action, unsigned long *hook_control, unsigned long deadline) {
   return nssm_hook(hook_threads, service, hook_event, hook_action, hook_control, deadline, true);
 }
 
-int nssm_hook(hook_thread_t *hook_threads, nssm_service_t *service, TCHAR *hook_event, TCHAR *hook_action, unsigned long *hook_control) {
+int nssm_hook(hook_thread_t *hook_threads, nssm_service_t *service, const TCHAR *hook_event, const TCHAR *hook_action, unsigned long *hook_control) {
   return nssm_hook(hook_threads, service, hook_event, hook_action, hook_control, NSSM_HOOK_DEADLINE);
 }
