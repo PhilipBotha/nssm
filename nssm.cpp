@@ -1,5 +1,5 @@
 #include "nssm.h"
-
+#include "helper.h"
 extern unsigned long tls_index;
 extern bool is_admin;
 extern imports_t imports;
@@ -316,7 +316,8 @@ int _tmain(int argc, TCHAR **argv) {
   */
   if (! GetStdHandle(STD_INPUT_HANDLE)) {
     /* Start service magic */
-    SERVICE_TABLE_ENTRY table[] = { { NSSM, service_main }, { 0, 0 } };
+    auto nssm_{ nssm::getVec(NSSM) };
+    SERVICE_TABLE_ENTRY table[] = { { nssm_.data(), service_main}, {0, 0}};
     if (! StartServiceCtrlDispatcher(table)) {
       unsigned long error = GetLastError();
       /* User probably ran nssm with no argument */

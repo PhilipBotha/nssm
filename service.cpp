@@ -1,5 +1,6 @@
 #include "nssm.h"
 #include <cstdint>
+#include "helper.h"
 bool is_admin;
 bool use_critical_section;
 
@@ -490,7 +491,7 @@ int remove_from_dependencies(TCHAR *dependencies, unsigned long dependencieslen,
 }
 
 int set_service_dependencies(const TCHAR *service_name, SC_HANDLE service_handle, TCHAR *buffer) {
-  TCHAR *dependencies = _T("");
+  TCHAR *dependencies{nullptr};
   unsigned long num_dependencies = 0;
 
   if (buffer && buffer[0]) {
@@ -574,7 +575,7 @@ int set_service_dependencies(const TCHAR *service_name, SC_HANDLE service_handle
 
         if (ok) _sntprintf_s(dependency, _countof(dependency), _TRUNCATE, _T("%s"), s);
         else {
-          HeapFree(GetProcessHeap(), 0, dependencies);
+          HeapFree(GetProcessHeap(), 0, const_cast<char*>(dependencies));
           if (groups) HeapFree(GetProcessHeap(), 0, groups);
           _ftprintf(stderr, _T("%s: %s"), s, error_string(ERROR_SERVICE_DEPENDENCY_DELETED));
           return 5;

@@ -35,8 +35,9 @@ static unsigned long WINAPI await_hook(void *arg) {
 
   if (ret) {
     CloseHandle(hook->process_handle);
-    auto name {nssm::getVec(hook->name)};
-    if (hook->name) HeapFree(GetProcessHeap(), 0, name.data());
+    if (hook->name) {
+        HeapFree(GetProcessHeap(), 0, const_cast<char*>(hook->name));
+    }
     HeapFree(GetProcessHeap(), 0, hook);
     return ret;
   }
@@ -44,8 +45,9 @@ static unsigned long WINAPI await_hook(void *arg) {
   unsigned long exitcode;
   GetExitCodeProcess(hook->process_handle, &exitcode);
   CloseHandle(hook->process_handle);
-  auto hname{nssm::getVec(hook->name)};
-  if (hook->name) HeapFree(GetProcessHeap(), 0, hname.data());
+  if (hook->name) {
+      HeapFree(GetProcessHeap(), 0, const_cast<char*>(hook->name));
+  }
   HeapFree(GetProcessHeap(), 0, hook);
 
   if (exitcode == NSSM_HOOK_STATUS_ABORT) return NSSM_HOOK_STATUS_ABORT;
@@ -54,7 +56,7 @@ static unsigned long WINAPI await_hook(void *arg) {
   return NSSM_HOOK_STATUS_SUCCESS;
 }
 
-static void set_hook_runtime(TCHAR *v, FILETIME *start, FILETIME *now) {
+static void set_hook_runtime(const TCHAR *v, FILETIME *start, FILETIME *now) {
   if (start && now) {
     ULARGE_INTEGER s;
     s.LowPart = start->dwLowDateTime;
@@ -386,8 +388,9 @@ int nssm_hook(hook_thread_t *hook_threads, nssm_service_t *service, TCHAR *hook_
     else {
       log_event(EVENTLOG_ERROR_TYPE, NSSM_EVENT_CREATETHREAD_FAILED, error_string(GetLastError()), 0);
       await_hook(hook);
-      auto name{nssm::getVec(hook->name)};
-      if (hook->name) HeapFree(GetProcessHeap(), 0, name.data());
+      if (hook->name) {
+          HeapFree(GetProcessHeap(), 0, const_cast<char*>(hook->name));
+      }
       HeapFree(GetProcessHeap(), 0, hook);
     }
   }
