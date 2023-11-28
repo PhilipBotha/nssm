@@ -1704,7 +1704,6 @@ const TCHAR *service_status_text(unsigned long status) {
 void log_service_control(TCHAR *service_name, unsigned long control, bool handled) {
     try {
         std::basic_string<TCHAR> control_text{service_control_text(control)};
-        const TCHAR *text = service_control_text(control);
         unsigned long event;
         if (control_text.empty()) {
             control_text = std::format(_T("0x{:08x}"), control); // print out hex (0x) with 8 bytes.
@@ -1715,7 +1714,7 @@ void log_service_control(TCHAR *service_name, unsigned long control, bool handle
             event = NSSM_EVENT_SERVICE_CONTROL_NOT_HANDLED;
         }
 
-        log_event(EVENTLOG_INFORMATION_TYPE, event, service_name, text, 0);
+        log_event(EVENTLOG_INFORMATION_TYPE, event, service_name, control_text.c_str(), 0);
 
     } catch (const std::bad_alloc &e) {
         log_event(EVENTLOG_ERROR_TYPE, NSSM_EVENT_OUT_OF_MEMORY, _T("control code"), _T("log_service_control()"), 0);
