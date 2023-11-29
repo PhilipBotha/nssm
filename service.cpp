@@ -900,8 +900,6 @@ int pre_edit_service(int argc, TCHAR **argv) {
   enum { MODE_EDITING, MODE_GETTING, MODE_SETTING, MODE_RESETTING, MODE_DUMPING } mode = MODE_EDITING;
   const TCHAR *verb = argv[0];
   const TCHAR *service_name = argv[1];
-  bool getting = false;
-  bool unsetting = false;
 
   /* Minimum number of arguments. */
   int mandatory = 2;
