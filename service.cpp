@@ -682,12 +682,14 @@ int get_service_dependencies(const TCHAR *service_name, SC_HANDLE service_handle
 int set_service_description(const TCHAR *service_name, SC_HANDLE service_handle, TCHAR *buffer) {
   SERVICE_DESCRIPTION description;
   ZeroMemory(&description, sizeof(description));
+  TCHAR tmp{0};
+    description.lpDescription = &tmp;
+
   /*
     lpDescription must be NULL if we aren't changing, the new description
     or "".
   */
   if (buffer && buffer[0]) description.lpDescription = buffer;
-  else description.lpDescription = _T("");
 
   if (ChangeServiceConfig2(service_handle, SERVICE_CONFIG_DESCRIPTION, &description)) return 0;
 
@@ -1283,10 +1285,11 @@ int edit_service(nssm_service_t *service, bool editing) {
     Password must be NULL if we aren't changing, a password or "".
     Empty passwords are valid but we won't allow them in the GUI.
   */
-  TCHAR *username = 0;
-  TCHAR *canon = 0;
-  TCHAR *password = 0;
+  const TCHAR *username{nullptr};
+  TCHAR *canon{nullptr};
+  TCHAR *password{nullptr};
   boolean virtual_account = false;
+  auto local_system_account{nssm::to_array_nullterm(NSSM_LOCALSYSTEM_ACCOUNT)};
   if (service->usernamelen) {
     username = service->username;
     if (is_virtual_account(service->name, username)) {
@@ -1303,10 +1306,10 @@ int edit_service(nssm_service_t *service, bool editing) {
       if (service->passwordlen) password = service->password;
     }
   }
-  else if (editing) username = canon = NSSM_LOCALSYSTEM_ACCOUNT;
-
+  else if (editing) username = canon = local_system_account.data();
+  TCHAR tmp_null{0};
   if (! virtual_account) {
-    if (well_known_username(canon)) password = _T("");
+    if (well_known_username(canon)) password = &tmp_null;
     else {
       if (grant_logon_as_service(canon)) {
         if (canon != username) HeapFree(GetProcessHeap(), 0, canon);
@@ -1315,9 +1318,9 @@ int edit_service(nssm_service_t *service, bool editing) {
       }
     }
   }
-
-  TCHAR *dependencies = _T("");
-  if (service->dependencieslen) dependencies = 0; /* Change later. */
+  TCHAR tmp_null_dep{0};
+  TCHAR *dependencies = &tmp_null_dep;
+  if (service->dependencieslen) dependencies = nullptr; /* Change later. */
 
   if (! ChangeServiceConfig(service->handle, service->type, startup, SERVICE_NO_CHANGE, 0, 0, 0, dependencies, canon, password, service->displayname)) {
     if (canon != username) HeapFree(GetProcessHeap(), 0, canon);

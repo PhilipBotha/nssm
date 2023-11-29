@@ -2,6 +2,8 @@
 #include <cstdint>
 #include <windows.h>
 #include <winsvc.h>
+#include <array>
+#include "helper.h"
 /* XXX: (value && value->string) is probably bogus because value is probably never null */
 
 /* Affinity. */
@@ -293,9 +295,11 @@ static int setting_set_hook(const TCHAR *service_name, void *param, const TCHAR 
   TCHAR hook_action[HOOK_NAME_LENGTH];
   if (! split_hook_name(additional, hook_event, hook_action)) return -1;
 
-  TCHAR *cmd;
-  if (value && value->string) cmd = value->string;
-  else cmd = _T("");
+  TCHAR tmp{0};
+  TCHAR *cmd{&tmp};
+  if (value && value->string) {
+      cmd = value->string;
+  }
 
   if (set_hook(service_name, hook_event, hook_action, cmd)) return -1;
   if (! _tcslen(cmd)) return 0;
@@ -1078,8 +1082,9 @@ int native_set_objectname(const TCHAR *service_name, void *param, const TCHAR *n
   */
   bool localsystem = false;
   bool virtual_account = false;
-  TCHAR *username = NSSM_LOCALSYSTEM_ACCOUNT;
-  TCHAR *password = 0;
+  const TCHAR *username = NSSM_LOCALSYSTEM_ACCOUNT;
+  TCHAR password_tmp{0};
+  TCHAR *password{nullptr};
   if (additional) {
     username = (TCHAR *) additional;
     if (value && value->string) password = value->string;
@@ -1091,7 +1096,7 @@ int native_set_objectname(const TCHAR *service_name, void *param, const TCHAR *n
   if (well_known) {
     if (str_equiv(well_known, NSSM_LOCALSYSTEM_ACCOUNT)) localsystem = true;
     username = (TCHAR *) well_known;
-    password = _T("");
+    password = &password_tmp;
   }
   else if (is_virtual_account(service_name, username)) virtual_account = true;
   else if (! password) {
@@ -1167,7 +1172,8 @@ int native_dump_objectname(const TCHAR *service_name, void *param, const TCHAR *
     if (! well_known_username(value->string)) {
       /* Parameters are the other way round. */
       value_t inverted;
-      inverted.string = _T("****");
+      std::array<TCHAR, 5> tmp{nssm::to_array_nullterm(_T("****"))};
+      inverted.string = tmp.data();
       return setting_dump_string(service_name, (void *) REG_SZ, name, &inverted, value->string);
     }
   }
@@ -1396,7 +1402,7 @@ int dump_setting(const TCHAR *service_name, HKEY key, SC_HANDLE service_handle, 
   if (setting->native) ret = get_setting(service_name, service_handle, setting, &value, 0);
   else ret = get_setting(service_name, key, setting, &value, 0);
   if (ret != 1) return ret;
-  return setting_dump_string(service_name, (void *) setting->type, setting->name, &value, 0);
+  return setting_dump_string(service_name, reinterpret_cast<void *>(setting->type), setting->name, &value, 0);
 }
 
 settings_t settings[] = {
@@ -1447,7 +1453,7 @@ settings_t settings[] = {
   { NSSM_NATIVE_IMAGEPATH, REG_EXPAND_SZ, NULL, true, 0, native_set_imagepath, native_get_imagepath, setting_not_dumpable },
   { NSSM_NATIVE_OBJECTNAME, REG_SZ, NSSM_LOCALSYSTEM_ACCOUNT, true, 0, native_set_objectname, native_get_objectname, native_dump_objectname },
   { NSSM_NATIVE_NAME, REG_SZ, NULL, true, 0, native_set_name, native_get_name, setting_not_dumpable },
-  { NSSM_NATIVE_STARTUP, REG_SZ, NULL, true, 0, native_set_startup, native_get_startup, 0 },
-  { NSSM_NATIVE_TYPE, REG_SZ, NULL, true, 0, native_set_type, native_get_type, 0 },
-  { NULL, NULL, NULL, NULL, NULL }
+  { NSSM_NATIVE_STARTUP, REG_SZ, NULL, true, 0, native_set_startup, native_get_startup, nullptr },
+  { NSSM_NATIVE_TYPE, REG_SZ, nullptr, true, 0, native_set_type, native_get_type, nullptr },
+  { nullptr, 0, nullptr, false, 0 }
 };

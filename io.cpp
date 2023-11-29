@@ -101,7 +101,7 @@ void close_handle(HANDLE *handle) {
 }
 
 /* Get path, share mode, creation disposition and flags for a stream. */
-int get_createfile_parameters(HKEY key, TCHAR *prefix, TCHAR *path, unsigned long *sharing, unsigned long default_sharing, unsigned long *disposition, unsigned long default_disposition, unsigned long *flags, unsigned long default_flags, bool *copy_and_truncate) {
+int get_createfile_parameters(HKEY key, const TCHAR *prefix, TCHAR *path, unsigned long *sharing, unsigned long default_sharing, unsigned long *disposition, unsigned long default_disposition, unsigned long *flags, unsigned long default_flags, bool *copy_and_truncate) {
   TCHAR value[NSSM_STDIO_LENGTH];
 
   /* Path. */
@@ -167,7 +167,7 @@ int get_createfile_parameters(HKEY key, TCHAR *prefix, TCHAR *path, unsigned lon
   return 0;
 }
 
-int set_createfile_parameter(HKEY key, TCHAR *prefix, TCHAR *suffix, unsigned long number) {
+int set_createfile_parameter(HKEY key, const TCHAR *prefix, const TCHAR *suffix, unsigned long number) {
   TCHAR value[NSSM_STDIO_LENGTH];
 
   if (_sntprintf_s(value, _countof(value), _TRUNCATE, _T("%s%s"), prefix, suffix) < 0) {
@@ -178,7 +178,7 @@ int set_createfile_parameter(HKEY key, TCHAR *prefix, TCHAR *suffix, unsigned lo
   return set_number(key, value, number);
 }
 
-int delete_createfile_parameter(HKEY key, TCHAR *prefix, TCHAR *suffix) {
+int delete_createfile_parameter(HKEY key, const TCHAR *prefix, const TCHAR *suffix) {
   TCHAR value[NSSM_STDIO_LENGTH];
 
   if (_sntprintf_s(value, _countof(value), _TRUNCATE, _T("%s%s"), prefix, suffix) < 0) {

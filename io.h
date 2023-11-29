@@ -30,9 +30,9 @@ typedef struct {
 
 void close_handle(HANDLE *, HANDLE *);
 void close_handle(HANDLE *);
-int get_createfile_parameters(HKEY, TCHAR *, TCHAR *, unsigned long *, unsigned long, unsigned long *, unsigned long, unsigned long *, unsigned long, bool *);
-int set_createfile_parameter(HKEY, TCHAR *, TCHAR *, unsigned long);
-int delete_createfile_parameter(HKEY, TCHAR *, TCHAR *);
+int get_createfile_parameters(HKEY key, const TCHAR *prefix, TCHAR *path, unsigned long *sharing, unsigned long default_sharing, unsigned long *disposition, unsigned long default_disposition, unsigned long *flags, unsigned long default_flags, bool *copy_and_truncate);
+int set_createfile_parameter(HKEY key, const TCHAR *prefix, const TCHAR *suffix, unsigned long number);
+int delete_createfile_parameter(HKEY key, const TCHAR *prefix, const TCHAR *suffix);
 HANDLE write_to_file(TCHAR *, unsigned long, SECURITY_ATTRIBUTES *, unsigned long, unsigned long);
 void rotate_file(TCHAR *, TCHAR *, unsigned long, unsigned long, unsigned long, unsigned long, bool);
 int get_output_handles(nssm_service_t *, STARTUPINFO *);

@@ -23,14 +23,35 @@ namespace nssm {
     to_array(const T (&a)[N], std::index_sequence<Is...>) noexcept{
         return {{a[Is]...}};
     }
-    /// Template function to initialse an array with a litteral string.
-    /// \tparam T
-    /// \tparam N The size of the array.
-    /// \param a The string litteral
-    /// \return
+    /// Template function to initialize an array with a literal string. The resultant array does not have the null
+    /// terminating character.
+    /// \tparam T Either a char or a wchar_t.
+    /// \tparam N The length of the string including the null terminator.
+    /// \param a The string literal
+    /// \return An array containing the string literal without the null terminator.
+    /// \note Do not use the data() member function to pass the string in the array to a function expecting a
+    /// null terminated string. I.e. functions expecting char *.
     template<Char_c T, std::size_t N>
     [[nodiscard]] constexpr std::array<T, N - 1> to_array(const T (&a)[N]) noexcept{
         return to_array(a, std::make_index_sequence<N - 1>());
+    }
+
+    template<Char_c T, std::size_t N, std::size_t ... Is>
+    [[nodiscard]] constexpr std::array<T, N>
+    to_array_nullterm(const T (&a)[N], std::index_sequence<Is...>) noexcept{
+        return {{a[Is]...}};
+    }
+
+    /// Template function to initialize an array with a literal string. The resultant array does have the null. The
+    /// resultant array can be, using the data(), passed to functions expecting null terminated strings.
+    /// terminating character.
+    /// \tparam T Either a char or a wchar_t.
+    /// \tparam N The length of the string including the null terminator.
+    /// \param a The string literal
+    /// \return An array containing the string literal including the null terminator.
+    template<Char_c T, std::size_t N>
+    [[nodiscard]] constexpr std::array<T, N> to_array_nullterm(const T (&a)[N]) noexcept{
+        return to_array_nullterm(a, std::make_index_sequence<N>());
     }
 
     template<std::size_t N>

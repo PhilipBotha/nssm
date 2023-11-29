@@ -240,7 +240,7 @@ int create_exit_action(TCHAR *service_name, const TCHAR *action_string, bool edi
   return 0;
 }
 
-int get_environment(TCHAR *service_name, HKEY key, TCHAR *value, TCHAR **env, unsigned long *envlen) {
+int get_environment(TCHAR *service_name, HKEY key, const TCHAR *value, TCHAR **env, unsigned long *envlen) {
   unsigned long type = REG_MULTI_SZ;
   unsigned long envsize;
 
@@ -293,7 +293,7 @@ int get_environment(TCHAR *service_name, HKEY key, TCHAR *value, TCHAR **env, un
 }
 
 
-int get_string(HKEY key, TCHAR *value, TCHAR *data, unsigned long datalen, bool expand, bool sanitise, bool must_exist) {
+int get_string(HKEY key, const TCHAR *value, TCHAR *data, unsigned long datalen, bool expand, bool sanitise, bool must_exist) {
   TCHAR *buffer = (TCHAR *) HeapAlloc(GetProcessHeap(), 0, datalen);
   if (! buffer) {
     log_event(EVENTLOG_ERROR_TYPE, NSSM_EVENT_OUT_OF_MEMORY, value, _T("get_string()"), 0);
@@ -347,11 +347,11 @@ int get_string(HKEY key, TCHAR *value, TCHAR *data, unsigned long datalen, bool 
   return get_string(key, value, data, datalen, false, sanitise, true);
 }
 
-int expand_parameter(HKEY key, TCHAR *value, TCHAR *data, unsigned long datalen, bool sanitise, bool must_exist) {
+int expand_parameter(HKEY key, const TCHAR *value, TCHAR *data, unsigned long datalen, bool sanitise, bool must_exist) {
   return get_string(key, value, data, datalen, true, sanitise, must_exist);
 }
 
-int expand_parameter(HKEY key, TCHAR *value, TCHAR *data, unsigned long datalen, bool sanitise) {
+int expand_parameter(HKEY key, const TCHAR *value, TCHAR *data, unsigned long datalen, bool sanitise) {
   return expand_parameter(key, value, data, datalen, sanitise, true);
 }
 
@@ -380,7 +380,7 @@ int set_expand_string(HKEY key, const TCHAR *value, TCHAR *string) {
   Returns: 0 if it was set.
            1 on error.
 */
-int set_number(HKEY key, TCHAR *value, unsigned long number) {
+int set_number(HKEY key, const TCHAR *value, unsigned long number) {
   if (RegSetValueEx(key, value, 0, REG_DWORD, (const unsigned char *) &number, sizeof(number)) == ERROR_SUCCESS) return 0;
   log_event(EVENTLOG_ERROR_TYPE, NSSM_EVENT_SETVALUE_FAILED, value, error_string(GetLastError()), 0);
   return 1;
@@ -393,7 +393,7 @@ int set_number(HKEY key, TCHAR *value, unsigned long number) {
            -1 if none was found and must_exist is true.
            -2 otherwise.
 */
-int get_number(HKEY key, TCHAR *value, unsigned long *number, bool must_exist) {
+int get_number(HKEY key, const TCHAR *value, unsigned long *number, bool must_exist) {
   unsigned long type = REG_DWORD;
   unsigned long number_len = sizeof(unsigned long);
 
@@ -649,7 +649,7 @@ int remove_from_double_null(TCHAR *dn, unsigned long dnlen, TCHAR **newdn, unsig
   return 0;
 }
 
-void override_milliseconds(TCHAR *service_name, HKEY key, TCHAR *value, unsigned long *buffer, unsigned long default_value, unsigned long event) {
+void override_milliseconds(TCHAR *service_name, HKEY key, const TCHAR *value, unsigned long *buffer, unsigned long default_value, unsigned long event) {
   unsigned long type = REG_DWORD;
   unsigned long buflen = sizeof(unsigned long);
   bool ok = false;
