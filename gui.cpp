@@ -302,7 +302,7 @@ static inline void set_hook_tab(int event_index, int action_index, bool changed)
   SendMessage(combo, CB_RESETCONTENT, 0, 0);
 
   const TCHAR *hook_event = hook_event_strings[event_index];
-  TCHAR *hook_action;
+  TCHAR* hook_action{ nullptr };
   int i;
   switch (event_index + first_event) {
     case NSSM_GUI_HOOK_EVENT_ROTATE:

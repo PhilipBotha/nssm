@@ -1011,7 +1011,7 @@ int get_hook(const TCHAR *service_name, const TCHAR *hook_event, const TCHAR *ho
     log_event(EVENTLOG_ERROR_TYPE, NSSM_EVENT_OUT_OF_MEMORY, _T("hook registry"), _T("get_hook()"), 0);
     return 1;
   }
-  HKEY key;
+  HKEY key{ nullptr };
   long error = open_registry(service_name, registry, KEY_READ, &key, false);
   if (! key) {
     if (error == ERROR_FILE_NOT_FOUND) {

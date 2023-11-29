@@ -156,7 +156,7 @@ static int setting_dump_string(const TCHAR *service_name, void *param, const TCH
 
 static int setting_set_exit_action(const TCHAR *service_name, void *param, const TCHAR *name, void *default_value, value_t *value, const TCHAR *additional) {
   unsigned long exitcode;
-  TCHAR *code;
+  TCHAR* code{ nullptr };
   TCHAR action_string[ACTION_LEN];
 
   if (additional) {
@@ -758,7 +758,7 @@ static int native_set_dependongroup(const TCHAR *service_name, void *param, cons
   }
 
   /* Update the group list. */
-  TCHAR *groups_buffer;
+  TCHAR* groups_buffer{ nullptr };
   unsigned long groups_buflen;
   if (native_set_dependon(service_name, service_handle, &groups_buffer, &groups_buflen, value, DEPENDENCY_GROUPS)) return -1;
 
@@ -873,7 +873,7 @@ static int native_set_dependonservice(const TCHAR *service_name, void *param, co
   }
 
   /* Update the service list. */
-  TCHAR *services_buffer;
+  TCHAR* services_buffer{ nullptr };
   unsigned long services_buflen;
   if (native_set_dependon(service_name, service_handle, &services_buffer, &services_buflen, value, DEPENDENCY_SERVICES)) return -1;
 

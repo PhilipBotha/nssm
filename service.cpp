@@ -195,7 +195,7 @@ int affinity_string_to_mask(TCHAR *string, __int64 *mask) {
   list_t set[64];
 
   TCHAR *s = string;
-  TCHAR *end;
+  TCHAR* end{ nullptr };
   int ret;
   int i;
   int n = 0;
@@ -925,7 +925,7 @@ int pre_edit_service(int argc, TCHAR **argv) {
 
   const TCHAR *parameter = 0;
   settings_t *setting = 0;
-  TCHAR *additional;
+  TCHAR* additional{ nullptr };
 
   /* Validate the parameter. */
   if (mandatory > 2) {
@@ -1065,7 +1065,7 @@ int pre_edit_service(int argc, TCHAR **argv) {
     return 0;
   }
 
-  HKEY key;
+  HKEY key{ nullptr };
   value_t value;
   int ret;
 
