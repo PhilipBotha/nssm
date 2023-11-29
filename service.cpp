@@ -576,7 +576,7 @@ int set_service_dependencies(const TCHAR *service_name, SC_HANDLE service_handle
 
         if (ok) _sntprintf_s(dependency, _countof(dependency), _TRUNCATE, _T("%s"), s);
         else {
-          HeapFree(GetProcessHeap(), 0, const_cast<char*>(dependencies));
+          HeapFree(GetProcessHeap(), 0, const_cast<TCHAR*>(dependencies));
           if (groups) HeapFree(GetProcessHeap(), 0, groups);
           _ftprintf(stderr, _T("%s: %s"), s, error_string(ERROR_SERVICE_DEPENDENCY_DELETED));
           return 5;
@@ -814,7 +814,7 @@ void set_nssm_service_defaults(nssm_service_t *service) {
   service->stderr_disposition = NSSM_STDERR_DISPOSITION;
   service->stderr_flags = NSSM_STDERR_FLAGS;
   service->throttle_delay = NSSM_RESET_THROTTLE_RESTART;
-  service->stop_method = ~0;
+  service->stop_method = ~0UL;
   service->kill_console_delay = NSSM_KILL_CONSOLE_GRACE_PERIOD;
   service->kill_window_delay = NSSM_KILL_WINDOW_GRACE_PERIOD;
   service->kill_threads_delay = NSSM_KILL_THREADS_GRACE_PERIOD;

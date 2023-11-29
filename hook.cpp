@@ -25,7 +25,7 @@ static unsigned long WINAPI await_hook(void *arg) {
   else hook->k.name = _T("hook");
   hook->k.process_handle = hook->process_handle;
   hook->k.pid = hook->pid;
-  hook->k.stop_method = ~0;
+  hook->k.stop_method = ~0UL;
   hook->k.kill_console_delay = NSSM_KILL_CONSOLE_GRACE_PERIOD;
   hook->k.kill_window_delay = NSSM_KILL_WINDOW_GRACE_PERIOD;
   hook->k.kill_threads_delay = NSSM_KILL_THREADS_GRACE_PERIOD;
@@ -36,7 +36,7 @@ static unsigned long WINAPI await_hook(void *arg) {
   if (ret) {
     CloseHandle(hook->process_handle);
     if (hook->name) {
-        HeapFree(GetProcessHeap(), 0, const_cast<char*>(hook->name));
+        HeapFree(GetProcessHeap(), 0, const_cast<TCHAR*>(hook->name));
     }
     HeapFree(GetProcessHeap(), 0, hook);
     return ret;
@@ -46,7 +46,7 @@ static unsigned long WINAPI await_hook(void *arg) {
   GetExitCodeProcess(hook->process_handle, &exitcode);
   CloseHandle(hook->process_handle);
   if (hook->name) {
-      HeapFree(GetProcessHeap(), 0, const_cast<char*>(hook->name));
+      HeapFree(GetProcessHeap(), 0, const_cast<TCHAR*>(hook->name));
   }
   HeapFree(GetProcessHeap(), 0, hook);
 
@@ -387,7 +387,7 @@ int nssm_hook(hook_thread_t *hook_threads, nssm_service_t *service, const TCHAR 
       log_event(EVENTLOG_ERROR_TYPE, NSSM_EVENT_CREATETHREAD_FAILED, error_string(GetLastError()), 0);
       await_hook(hook);
       if (hook->name) {
-          HeapFree(GetProcessHeap(), 0, const_cast<char*>(hook->name));
+          HeapFree(GetProcessHeap(), 0, const_cast<TCHAR*>(hook->name));
       }
       HeapFree(GetProcessHeap(), 0, hook);
     }

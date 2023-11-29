@@ -432,7 +432,7 @@ int print_process(nssm_service_t *service, kill_t *k) {
   }
 
   //_tprintf(_T("% 8lu %s%s\n"), k->pid, buffer ? buffer : _T(""), exe);
-  _tprintf("%s", std::format(_T("{:>8} {}{}\n"), k->pid, buffer ? buffer : _T(""), exe).c_str());
+  _tprintf(_T("%s"), std::format(_T("{:>8} {}{}\n"), k->pid, buffer ? buffer : _T(""), exe).c_str());
 
   if (buffer) HeapFree(GetProcessHeap(), 0, buffer);
   return 1;

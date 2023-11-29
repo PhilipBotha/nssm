@@ -317,7 +317,7 @@ int grant_logon_as_service(const TCHAR *username) {
   LSA_UNICODE_STRING lsa_right{nssm::getLsa(nssm_buffer)};
 
   LSA_UNICODE_STRING *rights;
-  unsigned long count = ~0;
+  unsigned long count = ~0UL;
   status = LsaEnumerateAccountRights(policy, sid, &rights, &count);
   if (status != STATUS_SUCCESS) {
     /*

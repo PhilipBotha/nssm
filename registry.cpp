@@ -888,7 +888,7 @@ int get_parameters(nssm_service_t *service, STARTUPINFO *si) {
   else stop_ok = true;
 
   /* Try all methods except those requested to be skipped. */
-  service->stop_method = ~0;
+  service->stop_method = ~0UL;
   if (stop_ok) service->stop_method &= ~stop_method_skip;
 
   /* Try to get kill delays - may fail. */
