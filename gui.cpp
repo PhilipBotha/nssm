@@ -922,7 +922,7 @@ void browse(HWND window, const TCHAR *current, unsigned long flags, ...) {
     len = 0;
     /* "Applications" + NULL + "*.exe" + NULL */
     va_start(arg, flags);
-    while (i = va_arg(arg, int)) {
+    while ((i = va_arg(arg, int))) {
       TCHAR *localised = message_string(i);
       _sntprintf_s((TCHAR *) ofn.lpstrFilter + len, bufsize - len, _TRUNCATE, localised);
       len += _tcslen(localised) + 1;
