@@ -186,7 +186,7 @@ int affinity_mask_to_string(__int64 mask, TCHAR **string) {
   return 0;
 }
 
-int affinity_string_to_mask(TCHAR *string, __int64 *mask) {
+int affinity_string_to_mask(TCHAR *string, std::int64_t *mask) {
   if (! mask) return 1;
 
   *mask = 0LL;
@@ -244,7 +244,9 @@ int affinity_string_to_mask(TCHAR *string, __int64 *mask) {
   }
 
   for (i = 0; i <= n; i++) {
-    for (int j = set[i].first; j <= set[i].last; j++) (__int64) *mask |= (1LL << (__int64) j);
+    for (int j = set[i].first; j <= set[i].last; j++){
+         *mask |= (std::int64_t)(1ULL << (std::int64_t) j);
+    }
   }
 
   return 0;
@@ -2206,64 +2208,52 @@ void throttle_restart(nssm_service_t *service) {
            0 if the wait completed.
           -1 on error.
 */
-int await_single_handle(SERVICE_STATUS_HANDLE status_handle, SERVICE_STATUS *status, HANDLE handle, TCHAR *name, TCHAR *function_name, unsigned long timeout) {
-  unsigned long interval;
-  unsigned long ret;
-  unsigned long waited;
-  TCHAR interval_milliseconds[16];
-  TCHAR timeout_milliseconds[16];
-  TCHAR waited_milliseconds[16];
-  TCHAR *function = function_name;
+namespace nssm {
+    int await_single_handle(SERVICE_STATUS_HANDLE status_handle, SERVICE_STATUS *status, HANDLE handle,
+                            const std::wstring name, std::wstring function_name, unsigned long timeout) {
+        int ret;
+        unsigned long waited{0U};
+        TCHAR interval_milliseconds[16];
+        TCHAR timeout_milliseconds[16];
+        TCHAR waited_milliseconds[16];
+        function_name += L"()";
 
-  /* Add brackets to function name. */
-  size_t funclen = _tcslen(function_name) + 3;
-  TCHAR *func = (TCHAR *) HeapAlloc(GetProcessHeap(), 0, funclen * sizeof(TCHAR));
-  if (func) {
-    if (_sntprintf_s(func, funclen, _TRUNCATE, _T("%s()"), function_name) > -1) function = func;
-  }
+        _sntprintf_s(timeout_milliseconds, _countof(timeout_milliseconds), _TRUNCATE, _T("%lu"), timeout);
 
-  _sntprintf_s(timeout_milliseconds, _countof(timeout_milliseconds), _TRUNCATE, _T("%lu"), timeout);
+        while (waited < timeout) {
+            std::uint64_t interval{timeout - waited};
+            if (interval > NSSM_SERVICE_STATUS_DEADLINE) {
+                interval = NSSM_SERVICE_STATUS_DEADLINE;
+            }
 
-  waited = 0;
-  while (waited < timeout) {
-    interval = timeout - waited;
-    if (interval > NSSM_SERVICE_STATUS_DEADLINE) interval = NSSM_SERVICE_STATUS_DEADLINE;
+            if (status) {
+                status->dwWaitHint += interval;
+                status->dwCheckPoint++;
+                SetServiceStatus(status_handle, status);
+            }
 
-    if (status) {
-      status->dwWaitHint += interval;
-      status->dwCheckPoint++;
-      SetServiceStatus(status_handle, status);
+            if (waited) {
+                _sntprintf_s(waited_milliseconds, _countof(waited_milliseconds), _TRUNCATE, _T("%lu"), waited);
+                _sntprintf_s(interval_milliseconds, _countof(interval_milliseconds), _TRUNCATE, _T("%lu"), interval);
+                log_event(EVENTLOG_INFORMATION_TYPE, NSSM_EVENT_AWAITING_SINGLE_HANDLE, function_name.c_str(),
+                          name.c_str(), waited_milliseconds, interval_milliseconds, timeout_milliseconds, 0);
+            }
+
+            switch (WaitForSingleObject(handle, interval)) {
+                case WAIT_OBJECT_0:
+                    ret = 0;
+                case WAIT_TIMEOUT:
+                    ret = 1;
+                    break;
+                default:
+                    ret = -1;
+            }
+            waited += interval;
+        }
+
+        return ret;
     }
-
-    if (waited) {
-      _sntprintf_s(waited_milliseconds, _countof(waited_milliseconds), _TRUNCATE, _T("%lu"), waited);
-      _sntprintf_s(interval_milliseconds, _countof(interval_milliseconds), _TRUNCATE, _T("%lu"), interval);
-      log_event(EVENTLOG_INFORMATION_TYPE, NSSM_EVENT_AWAITING_SINGLE_HANDLE, function, name, waited_milliseconds, interval_milliseconds, timeout_milliseconds, 0);
-    }
-
-    switch (WaitForSingleObject(handle, interval)) {
-      case WAIT_OBJECT_0:
-        ret = 0;
-        goto awaited;
-
-      case WAIT_TIMEOUT:
-        ret = 1;
-        break;
-
-      default:
-        ret = -1;
-        goto awaited;
-    }
-
-    waited += interval;
-  }
-
-awaited:
-  if (func) HeapFree(GetProcessHeap(), 0, func);
-
-  return ret;
 }
-
 int list_nssm_services(int argc, TCHAR **argv) {
   bool including_native = (argc > 0 && str_equiv(argv[0], _T("all")));
 

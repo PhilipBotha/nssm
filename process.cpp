@@ -222,7 +222,7 @@ int kill_process(nssm_service_t *service, kill_t *k) {
   if (k->stop_method & NSSM_STOP_METHOD_WINDOW) {
     EnumWindows((WNDENUMPROC) kill_window, (LPARAM) k);
     if (k->signalled) {
-      if (! await_single_handle(k->status_handle, k->status, k->process_handle, k->name, _T(__FUNCTION__), k->kill_window_delay)) return 1;
+      if (! await_single_handle(k->status_handle, k->status, k->process_handle, k->name, reinterpret_cast<const wchar_t *>(__FUNCTION__), k->kill_window_delay)) return 1;
       k->signalled = 0;
     }
   }
@@ -234,7 +234,7 @@ int kill_process(nssm_service_t *service, kill_t *k) {
   */
   if (k->stop_method & NSSM_STOP_METHOD_THREADS) {
     if (kill_threads(k)) {
-      if (! await_single_handle(k->status_handle, k->status, k->process_handle, k->name, _T(__FUNCTION__), k->kill_threads_delay)) return 1;
+      if (! await_single_handle(k->status_handle, k->status, k->process_handle, k->name, reinterpret_cast<const wchar_t *>(__FUNCTION__), k->kill_threads_delay)) return 1;
     }
   }
 
@@ -302,7 +302,7 @@ int kill_console(nssm_service_t *service, kill_t *k) {
   }
 
   /* Wait for process to exit. */
-  if (await_single_handle(k->status_handle, k->status, k->process_handle, k->name, _T(__FUNCTION__), k->kill_console_delay)) ret = 6;
+  if (await_single_handle(k->status_handle, k->status, k->process_handle, k->name, reinterpret_cast<const wchar_t *>(__FUNCTION__), k->kill_console_delay)) ret = 6;
 
   /* Remove our handler. */
   if (ignored && ! SetConsoleCtrlHandler(0, FALSE)) {

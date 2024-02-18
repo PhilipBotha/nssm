@@ -10,6 +10,8 @@ string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_ID)
 message(STATUS "Compiler ID string is: ${COMPILER_ID}")
 set(CMAKE_MC_COMPILER="C:/msys64/mingw64/bin/windmc.exe")
 
+
+add_compile_definitions(DUNICODE -DUNICODE -D_UNICODE D_UNICODE)
 if (COMPILER_ID STREQUAL "clang")
     message(STATUS "CLANG detected. Adding CLANG specific compile flags.")
     add_link_options("-fuse-ld=lld")
@@ -59,4 +61,4 @@ set(SOURCES account.cpp console.cpp env.cpp event.cpp gui.cpp hook.cpp imports.c
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME} -lshlwapi)
-
+target_compile_definitions(${PROJECT_NAME} PUBLIC DUNICODE)

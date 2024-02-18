@@ -273,7 +273,7 @@ const TCHAR *nssm_exe() {
   return imageargv0;
 }
 
-int _tmain(int argc, TCHAR **argv) {
+extern "C" int main(const int argc, wchar_t **argv) {
   if (check_console()) setup_utf8();
 
   /* Set up function pointers. */
@@ -360,4 +360,6 @@ int _tmain(int argc, TCHAR **argv) {
 
   /* And nothing more to do */
   nssm_exit(0);
+
+  return 0;
 }

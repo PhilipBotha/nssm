@@ -29,6 +29,8 @@
 #define NSSM_ROTATE_ONLINE 1
 #define NSSM_ROTATE_ONLINE_ASAP 2
 
+#include <string>
+
 typedef struct {
   bool native;
   TCHAR name[SERVICE_NAME_LENGTH];
@@ -164,8 +166,12 @@ int start_service(nssm_service_t *);
 int stop_service(nssm_service_t *, unsigned long, bool, bool);
 void CALLBACK end_service(void *, unsigned char);
 void throttle_restart(nssm_service_t *);
-int await_single_handle(SERVICE_STATUS_HANDLE, SERVICE_STATUS *, HANDLE, TCHAR *, TCHAR *, unsigned long);
+//int await_single_handle(SERVICE_STATUS_HANDLE, SERVICE_STATUS *, HANDLE, TCHAR *, TCHAR *, unsigned long);
 int list_nssm_services(int, TCHAR **);
 int service_process_tree(int, TCHAR **);
+
+namespace nssm{
+    int await_single_handle(SERVICE_STATUS_HANDLE status_handle, SERVICE_STATUS *status, HANDLE handle, std::wstring name, std::wstring function_name, unsigned long timeout);
+}
 
 #endif
