@@ -111,3 +111,5 @@ int popup_message(HWND owner, unsigned int type, unsigned long id, ...) {
 
   return ret;
 }
+
+}

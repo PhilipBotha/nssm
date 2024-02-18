@@ -309,6 +309,7 @@
     <ClCompile Include="env.cpp" />
     <ClCompile Include="event.cpp" />
     <ClCompile Include="gui.cpp" />
+    <ClCompile Include="helper.cpp" />
     <ClCompile Include="hook.cpp" />
     <ClCompile Include="imports.cpp" />
     <ClCompile Include="io.cpp" />

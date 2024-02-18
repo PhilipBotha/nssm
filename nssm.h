@@ -62,6 +62,7 @@
 #include "settings.h"
 #include "io.h"
 #include "gui.h"
+#include "helper.h"
 #endif
 
 #include <string>

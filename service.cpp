@@ -292,10 +292,16 @@ void set_service_environment(nssm_service_t *service) {
     We have to duplicate the block because this function will be called
     multiple times between registry reads.
   */
-  if (service->env) duplicate_environment_strings(service->env);
-  if (! service->env_extra) return;
+  if (service->env) {
+      duplicate_environment_strings(service->env);
+  }
+  if (! service->env_extra) {
+      return;
+  }
   TCHAR *env_extra = copy_environment_block(service->env_extra);
-  if (! env_extra) return;
+  if (! env_extra) {
+      return;
+  }
 
   set_environment_block(env_extra);
   HeapFree(GetProcessHeap(), 0, env_extra);
@@ -326,7 +332,9 @@ static unsigned long WINAPI launch_service(void *arg) {
 SC_HANDLE open_service_manager(unsigned long access) {
   SC_HANDLE ret = OpenSCManager(0, SERVICES_ACTIVE_DATABASE, access);
   if (! ret) {
-    if (is_admin) log_event(EVENTLOG_ERROR_TYPE, NSSM_EVENT_OPENSCMANAGER_FAILED, 0);
+    if (is_admin) {
+        log_event(EVENTLOG_ERROR_TYPE, NSSM_EVENT_OPENSCMANAGER_FAILED, 0);
+    }
     return 0;
   }
 
@@ -812,17 +820,19 @@ void set_nssm_service_defaults(nssm_service_t *service) {
   service->stderr_disposition = NSSM_STDERR_DISPOSITION;
   service->stderr_flags = NSSM_STDERR_FLAGS;
   service->throttle_delay = NSSM_RESET_THROTTLE_RESTART;
-  service->stop_method = ~0;
+  service->stop_method = ~0UL;
   service->kill_console_delay = NSSM_KILL_CONSOLE_GRACE_PERIOD;
   service->kill_window_delay = NSSM_KILL_WINDOW_GRACE_PERIOD;
   service->kill_threads_delay = NSSM_KILL_THREADS_GRACE_PERIOD;
-  service->kill_process_tree = 1;
+  service->kill_process_tree = true;
 }
 
 /* Allocate and zero memory for a service. */
 nssm_service_t *alloc_nssm_service() {
   nssm_service_t *service = (nssm_service_t *) HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(nssm_service_t));
-  if (! service) log_event(EVENTLOG_ERROR_TYPE, NSSM_EVENT_OUT_OF_MEMORY, _T("service"), _T("alloc_nssm_service()"), 0);
+  if (! service) {
+      log_event(EVENTLOG_ERROR_TYPE, NSSM_EVENT_OUT_OF_MEMORY, _T("service"), _T("alloc_nssm_service()"), 0);
+  }
   return service;
 }
 
@@ -865,19 +875,25 @@ int pre_install_service(int argc, TCHAR **argv) {
   /* Arguments are optional */
   size_t flagslen = 0;
   size_t s = 0;
-  int i;
-  for (i = 2; i < argc; i++) flagslen += _tcslen(argv[i]) + 1;
-  if (! flagslen) flagslen = 1;
+
+  for (int i = 2; i < argc; i++) {
+      flagslen += _tcslen(argv[i]) + 1;
+  }
+  if (! flagslen) {
+      flagslen = 1;
+  }
   if (flagslen > _countof(service->flags)) {
     print_message(stderr, NSSM_MESSAGE_FLAGS_TOO_LONG);
     return 2;
   }
 
-  for (i = 2; i < argc; i++) {
+  for (int i = 2; i < argc; i++) {
     size_t len = _tcslen(argv[i]);
     memmove(service->flags + s, argv[i], len * sizeof(TCHAR));
     s += len;
-    if (i < argc - 1) service->flags[s++] = _T(' ');
+    if (i < argc - 1) {
+        service->flags[s++] = _T(' ');
+    }
   }
 
   /* Work out directory name */
@@ -2303,7 +2319,9 @@ int list_nssm_services(int argc, TCHAR **argv) {
 
       get_parameters(service, 0);
       /* We manage the service if we have an Application. */
-      if (including_native || service->exe[0]) _tprintf(_T("%s\n"), service->name);
+      if (including_native || service->exe[0]) {
+          _tprintf(_T("%s\n"), service->name);
+      }
 
       cleanup_nssm_service(service);
     }

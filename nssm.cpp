@@ -2,7 +2,7 @@
 #include <format>
 #include <cstdint>
 #include "nssm.h"
-
+#include "helper.h"
 extern unsigned long tls_index;
 
 extern imports_t imports;
@@ -274,7 +274,9 @@ const TCHAR *nssm_exe() {
 }
 
 extern "C" int main(const int argc, wchar_t **argv) {
-  if (check_console()) setup_utf8();
+  if (check_console()) {
+      setup_utf8();
+  }
 
   /* Set up function pointers. */
   if (get_imports()) nssm_exit(111);
@@ -310,7 +312,9 @@ extern "C" int main(const int argc, wchar_t **argv) {
     if (str_equiv(argv[1], _T("statuscode"))) nssm_exit(control_service(SERVICE_CONTROL_INTERROGATE, argc - 2, argv + 2, true));
     if (str_equiv(argv[1], _T("rotate"))) nssm_exit(control_service(NSSM_SERVICE_CONTROL_ROTATE, argc - 2, argv + 2));
     if (str_equiv(argv[1], _T("install"))) {
-      if (! isAdmin()) nssm_exit(elevate(argc, argv, NSSM_MESSAGE_NOT_ADMINISTRATOR_CANNOT_INSTALL));
+      if (! isAdmin()) {
+          nssm_exit(elevate(argc, argv, NSSM_MESSAGE_NOT_ADMINISTRATOR_CANNOT_INSTALL));
+      }
       create_messages();
       nssm_exit(pre_install_service(argc - 2, argv + 2));
     }
@@ -333,7 +337,9 @@ extern "C" int main(const int argc, wchar_t **argv) {
   tls_index = TlsAlloc();
 
   /* Register messages */
-  if (isAdmin()) create_messages();
+  if (isAdmin()) {
+      create_messages();
+  }
 
   /*
     Optimisation for Windows 2000:
@@ -347,11 +353,14 @@ extern "C" int main(const int argc, wchar_t **argv) {
   */
   if (! GetStdHandle(STD_INPUT_HANDLE)) {
     /* Start service magic */
-    SERVICE_TABLE_ENTRY table[] = { { NSSM, service_main }, { 0, 0 } };
-    if (! StartServiceCtrlDispatcher(table)) {
+    auto name {nssm::to_array_nullterm(NSSM)};
+    const SERVICE_TABLE_ENTRY table[] = { {name.data(), service_main }, { nullptr, nullptr } };
+    if (!StartServiceCtrlDispatcher(table)) {
       unsigned long error = GetLastError();
       /* User probably ran nssm with no argument */
-      if (error == ERROR_FAILED_SERVICE_CONTROLLER_CONNECT) nssm_exit(usage(1));
+      if (error == ERROR_FAILED_SERVICE_CONTROLLER_CONNECT) {
+          nssm_exit(usage(1));
+      }
       log_event(EVENTLOG_ERROR_TYPE, NSSM_EVENT_DISPATCHER_FAILED, error_string(error), 0);
       nssm_exit(100);
     }

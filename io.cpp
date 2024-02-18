@@ -88,12 +88,20 @@ static inline void write_bom(logger_t *logger, unsigned long *out) {
 }
 
 void close_handle(HANDLE *handle, HANDLE *remember) {
-  if (remember) *remember = INVALID_HANDLE_VALUE;
-  if (! handle) return;
-  if (! *handle) return;
+  if (remember) {
+      *remember = INVALID_HANDLE_VALUE;
+  }
+  if (! handle) {
+      return;
+  }
+  if (! *handle) {
+      return;
+  }
   CloseHandle(*handle);
-  if (remember) *remember = *handle;
-  *handle = 0;
+  if (remember) {
+      *remember = *handle;
+  }
+  *handle = nullptr;
 }
 
 void close_handle(HANDLE *handle) {
@@ -264,8 +272,12 @@ void rotate_file(TCHAR *service_name, TCHAR *path, unsigned long seconds, unsign
 
   /* Check file size. */
   if (low || high) {
-    if (info.nFileSizeHigh < high) return;
-    if (info.nFileSizeHigh == high && info.nFileSizeLow < low) return;
+    if (info.nFileSizeHigh < high) {
+        return;
+    }
+    if (info.nFileSizeHigh == high && info.nFileSizeLow < low) {
+        return;
+    }
   }
 
   /* Get new filename. */
@@ -437,13 +449,17 @@ void cleanup_loggers(nssm_service_t *service) {
   /* Close write end of the data pipe so logging thread can finalise read. */
   close_handle(&service->stdout_si);
   /* Await logging thread then close read end. */
-  if (thread_handle != INVALID_HANDLE_VALUE) WaitForSingleObject(thread_handle, interval);
+  if (thread_handle != INVALID_HANDLE_VALUE) {
+      WaitForSingleObject(thread_handle, interval);
+  }
   close_handle(&service->stdout_pipe);
 
   thread_handle = INVALID_HANDLE_VALUE;
   close_handle(&service->stderr_thread, &thread_handle);
   close_handle(&service->stderr_si);
-  if (thread_handle != INVALID_HANDLE_VALUE) WaitForSingleObject(thread_handle, interval);
+  if (thread_handle != INVALID_HANDLE_VALUE) {
+      WaitForSingleObject(thread_handle, interval);
+  }
   close_handle(&service->stderr_pipe);
 }
 

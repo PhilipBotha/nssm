@@ -1,7 +1,7 @@
 #include "nssm.h"
 
 #include <sddl.h>
-
+#include "helper.h"
 #ifndef STATUS_SUCCESS
 #define STATUS_SUCCESS ERROR_SUCCESS
 #endif
@@ -284,7 +284,9 @@ const TCHAR *well_known_username(const TCHAR *username) {
 }
 
 int grant_logon_as_service(const TCHAR *username) {
-  if (! username) return 0;
+  if (! username) {
+      return 0;
+  }
 
   /* Open Policy object. */
   LSA_OBJECT_ATTRIBUTES attributes;
@@ -293,7 +295,9 @@ int grant_logon_as_service(const TCHAR *username) {
   LSA_HANDLE policy;
   NTSTATUS status;
 
-  if (open_lsa_policy(&policy)) return 1;
+  if (open_lsa_policy(&policy)) {
+      return 1;
+  }
 
   /* Look up SID for the account. */
   SID *sid;
@@ -312,7 +316,8 @@ int grant_logon_as_service(const TCHAR *username) {
 
   /* Check if the SID has the "Log on as a service" right. */
   LSA_UNICODE_STRING lsa_right;
-  lsa_right.Buffer = NSSM_LOGON_AS_SERVICE_RIGHT;
+  auto service_right{nssm::to_array_nullterm(NSSM_LOGON_AS_SERVICE_RIGHT)};
+  lsa_right.Buffer = service_right.data();
   lsa_right.Length = (unsigned short) wcslen(lsa_right.Buffer) * sizeof(wchar_t);
   lsa_right.MaximumLength = lsa_right.Length + sizeof(wchar_t);
 
@@ -334,8 +339,12 @@ int grant_logon_as_service(const TCHAR *username) {
   }
 
   for (unsigned long i = 0; i < count; i++) {
-    if (rights[i].Length != lsa_right.Length) continue;
-    if (_wcsnicmp(rights[i].Buffer, lsa_right.Buffer, lsa_right.MaximumLength)) continue;
+    if (rights[i].Length != lsa_right.Length) {
+        continue;
+    }
+    if (_wcsnicmp(rights[i].Buffer, lsa_right.Buffer, lsa_right.MaximumLength)) {
+        continue;
+    }
     /* The SID has the right. */
     FreeSid(sid);
     LsaFreeMemory(rights);
