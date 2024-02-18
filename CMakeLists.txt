@@ -26,7 +26,7 @@ endif ()
 if (COMPILER_ID STREQUAL "gnu")
     message(STATUS "GCC detected. Adding GCC specific compile flags.")
     set(IS_GCC_BUILD true)
-    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wduplicated-cond -Wunsafe-loop-optimizations -Wuseless-cast -Wlogical-op -Waggressive-loop-optimizations -Wstrict-overflow=2 -Wbidi-chars=any -Wduplicated-branches -Wduplicated-cond -Wimplicit-fallthrough=5 -Wimplicit-fallthrough=5 -Wformat-truncation=2 -Wformat-signedness -Wlogical-op -Wformat-overflow=2 -Wtrivial-auto-var-init -Wshift-overflow=2")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wduplicated-cond -Wunsafe-loop-optimizations -Wuseless-cast -Wlogical-op -Waggressive-loop-optimizations -Wstrict-overflow=2 -Wbidi-chars=any -Wduplicated-branches -Wduplicated-cond -Wimplicit-fallthrough=5 -Wimplicit-fallthrough=5 -Wformat-truncation=2 -Wformat-signedness -Wlogical-op -Wformat-overflow=2 -Wtrivial-auto-var-init -Wshift-overflow=2")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
 else ()
@@ -46,8 +46,8 @@ if (CMAKE_COMPILER_IS_GNUCXX OR IS_CLANG_BUILD OR IS_GCC_BUILD)
     message(STATUS "GCC/CLANG detected, adding compile flags")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g3 -Og")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
-
-    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Wdouble-promotion -Wnull-dereference -fdelete-null-pointer-checks -Wimplicit-fallthrough -Wuninitialized -Wsuggest-override -Wfloat-equal -Wcast-align -Wwrite-strings -Wconversion -Wzero-as-null-pointer-constant -Wparentheses -Wold-style-cast -Wshadow -Wformat=2 -Wformat-security -Wmissing-include-dirs -Wshift-overflow -Wunused-parameter -Wfloat-equal -Wcast-qual -Wcast-align -Wwrite-strings  -Wmissing-declarations")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -municode")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Wdouble-promotion -Wnull-dereference -fdelete-null-pointer-checks -Wimplicit-fallthrough -Wuninitialized -Wsuggest-override -Wfloat-equal -Wcast-align -Wwrite-strings -Wconversion -Wzero-as-null-pointer-constant -Wparentheses -Wold-style-cast -Wshadow -Wformat=2 -Wformat-security -Wmissing-include-dirs -Wshift-overflow -Wunused-parameter -Wfloat-equal -Wcast-qual -Wcast-align -Wwrite-strings  -Wmissing-declarations")
     #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wswitch-default") # Causes many warnings in third-party headers.
 endif (CMAKE_COMPILER_IS_GNUCXX OR IS_CLANG_BUILD OR IS_GCC_BUILD)
 
@@ -57,8 +57,21 @@ if (BUILD_TYPE_ID STREQUAL "release")
 endif (BUILD_TYPE_ID STREQUAL "release")
 
 set(CMAKE_CXX_STANDARD 20)
-set(SOURCES account.cpp console.cpp env.cpp event.cpp gui.cpp hook.cpp imports.cpp io.cpp nssm.cpp process.cpp registry.cpp service.cpp settings.cpp utf8.cpp)
+set(SOURCES account.cpp console.cpp env.cpp event.cpp gui.cpp hook.cpp imports.cpp io.cpp nssm.cpp process.cpp registry.cpp service.cpp settings.cpp utf8.cpp
+        helper.cpp
+
+)
+
+set(SOURCES2 src/helper.cpp src/console.cpp
+        src/nssm.cpp
+        src/imports.cpp
+        src/service.cpp
+        src/event.cpp)
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME} -lshlwapi)
 target_compile_definitions(${PROJECT_NAME} PUBLIC DUNICODE)
+
+add_executable(${PROJECT_NAME}2 ${SOURCES2})
+target_link_libraries(${PROJECT_NAME}2 -lshlwapi)
+target_include_directories(${PROJECT_NAME}2 PUBLIC inc)
