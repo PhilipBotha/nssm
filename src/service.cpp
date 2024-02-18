@@ -5,9 +5,31 @@
 #include "service.hpp"
 #include "wexception.hpp"
 #include <cstdint>
+#include <format>
 #include <iostream>
 #include <windows.h>
 namespace nssm {
+
+    void install_service(Service_t &service) {
+    }
+    void pre_install_service(const std::wstring &service_name, const std::filesystem::path &service_path,
+                             const std::span<const std::wstring> &args) {
+        constexpr std::size_t MAX_CMD_LENGTH{8192UL};
+        Service_t service{};
+        service.name = service_name;
+        if (!args.empty()) {
+            for (const auto &arg : args) {
+                service.flags += arg + L" ";
+            }
+            service.flags.pop_back(); // remove last space.
+            if (service.flags.size() > MAX_CMD_LENGTH) {
+                throw wexception{std::format(L"Too many arguments. Size {} exceed max of {}", service.flags.size(),
+                                             MAX_CMD_LENGTH)};
+            }
+        }
+        service.dir = service_path.root_directory();
+        install_service(service);
+    }
 
     [[nodiscard]] std::vector<ENUM_SERVICE_STATUS_PROCESSW> get_services() {
         DWORD required{0U};
