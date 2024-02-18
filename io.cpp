@@ -308,7 +308,7 @@ int get_output_handles(nssm_service_t *service, STARTUPINFO *si) {
   bool inherit_handles = false;
 
   /* Allocate a new console so we get a fresh stdin, stdout and stderr. */
-  alloc_console(service);
+  alloc_console(*service);
 
   /* stdin */
   if (service->stdin_path[0]) {
@@ -318,7 +318,8 @@ int get_output_handles(nssm_service_t *service, STARTUPINFO *si) {
       return 2;
     }
 
-    inherit_handles = true;
+    inherit_handles = true;
+
   }
 
   /* stdout */
@@ -345,7 +346,8 @@ int get_output_handles(nssm_service_t *service, STARTUPINFO *si) {
 
     if (dup_handle(service->stdout_si, &si->hStdOutput, _T("stdout_si"), _T("stdout"))) close_handle(&service->stdout_thread);
 
-    inherit_handles = true;
+    inherit_handles = true;
+
   }
 
   /* stderr */
@@ -385,7 +387,8 @@ int get_output_handles(nssm_service_t *service, STARTUPINFO *si) {
 
     if (dup_handle(service->stderr_si, &si->hStdError, _T("stderr_si"), _T("stderr"))) close_handle(&service->stderr_thread);
 
-    inherit_handles = true;
+    inherit_handles = true;
+
   }
 
   /*

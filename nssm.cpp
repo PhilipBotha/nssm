@@ -1,7 +1,10 @@
+#include <stdexcept>
+#include <format>
+#include <cstdint>
 #include "nssm.h"
 
 extern unsigned long tls_index;
-extern bool is_admin;
+
 extern imports_t imports;
 
 static TCHAR unquoted_imagepath[PATH_LENGTH];
@@ -177,18 +180,54 @@ int usage(int ret) {
   else print_message(stderr, NSSM_MESSAGE_USAGE, NSSM_VERSION, NSSM_CONFIGURATION, NSSM_DATE);
   return(ret);
 }
+namespace nssm {
+    [[nodiscard]] std::wstring getLastErrorMsg() {
+        const DWORD error_code{GetLastError()};
+        LPWSTR buffer{nullptr};
+        if (0 ==
+            FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                           nullptr,
+                           error_code, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), buffer, 0, nullptr)) {
+            //throw std::runtime_error{std::format("Failed to format error message. Error code: {}", GetLastError())};
+        }
 
-void check_admin() {
-  is_admin = false;
+        std::wstring error_message{buffer};
+        LocalFree(buffer);
+        return error_message;
+    }
 
-  /* Lifted from MSDN examples */
-  PSID AdministratorsGroup;
-  SID_IDENTIFIER_AUTHORITY NtAuthority = SECURITY_NT_AUTHORITY;
-  if (! AllocateAndInitializeSid(&NtAuthority, 2, SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0, 0, 0, &AdministratorsGroup)) return;
-  CheckTokenMembership(0, AdministratorsGroup, /*XXX*/(PBOOL) &is_admin);
-  FreeSid(AdministratorsGroup);
+
+    [[nodiscard]] bool isAdmin() {
+        bool is_admin{false};
+        PSID AdministratorsGroup;
+        SID_IDENTIFIER_AUTHORITY NtAuthority{SECURITY_NT_AUTHORITY};
+        if (0 !=
+            AllocateAndInitializeSid(&NtAuthority, 2, SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0,
+                                     0,
+                                     0, &AdministratorsGroup)) {
+            throw nssm::wexception{L"Could not allocate and initialize SID: Err msg: " + getLastErrorMsg()};
+        }
+        CheckTokenMembership(nullptr, AdministratorsGroup, reinterpret_cast<PBOOL>(&is_admin));
+        FreeSid(AdministratorsGroup);
+        return is_admin;
+    }
+
+    [[nodiscard]] std::uint16_t num_cpus() {
+        DWORD_PTR affinity{0U};
+        DWORD_PTR system_affinity{0U};
+        if (0 == GetProcessAffinityMask(GetCurrentProcess(), &affinity, &system_affinity)){
+            throw nssm::wexception{L"Error getting process affinity. Error: " + nssm::getLastErrorMsg()};
+        }
+        std::uint16_t i{};
+        for (i = 0U; system_affinity & (1ULL << i); ++i){
+            if (i == 64U){
+                break;
+            }
+        }
+        return i;
+    }
+
 }
-
 static int elevate(int argc, TCHAR **argv, unsigned long message) {
   print_message(stderr, message);
 
@@ -220,12 +259,7 @@ static int elevate(int argc, TCHAR **argv, unsigned long message) {
   return exitcode;
 }
 
-int num_cpus() {
-  DWORD_PTR i, affinity, system_affinity;
-  if (! GetProcessAffinityMask(GetCurrentProcess(), &affinity, &system_affinity)) return 64;
-  for (i = 0; system_affinity & (1LL << i); i++) if (i == 64) break;
-  return (int) i;
-}
+
 
 const TCHAR *nssm_unquoted_imagepath() {
   return unquoted_imagepath;
@@ -241,9 +275,6 @@ const TCHAR *nssm_exe() {
 
 int _tmain(int argc, TCHAR **argv) {
   if (check_console()) setup_utf8();
-
-  /* Remember if we are admin */
-  check_admin();
 
   /* Set up function pointers. */
   if (get_imports()) nssm_exit(111);
@@ -279,13 +310,13 @@ int _tmain(int argc, TCHAR **argv) {
     if (str_equiv(argv[1], _T("statuscode"))) nssm_exit(control_service(SERVICE_CONTROL_INTERROGATE, argc - 2, argv + 2, true));
     if (str_equiv(argv[1], _T("rotate"))) nssm_exit(control_service(NSSM_SERVICE_CONTROL_ROTATE, argc - 2, argv + 2));
     if (str_equiv(argv[1], _T("install"))) {
-      if (! is_admin) nssm_exit(elevate(argc, argv, NSSM_MESSAGE_NOT_ADMINISTRATOR_CANNOT_INSTALL));
+      if (! isAdmin()) nssm_exit(elevate(argc, argv, NSSM_MESSAGE_NOT_ADMINISTRATOR_CANNOT_INSTALL));
       create_messages();
       nssm_exit(pre_install_service(argc - 2, argv + 2));
     }
     if (str_equiv(argv[1], _T("edit")) || str_equiv(argv[1], _T("get")) || str_equiv(argv[1], _T("set")) || str_equiv(argv[1], _T("reset")) || str_equiv(argv[1], _T("unset")) || str_equiv(argv[1], _T("dump"))) {
       int ret = pre_edit_service(argc - 1, argv + 1);
-      if (ret == 3 && ! is_admin && argc == 3) nssm_exit(elevate(argc, argv, NSSM_MESSAGE_NOT_ADMINISTRATOR_CANNOT_EDIT));
+      if (ret == 3 && ! isAdmin() && argc == 3) nssm_exit(elevate(argc, argv, NSSM_MESSAGE_NOT_ADMINISTRATOR_CANNOT_EDIT));
       /* There might be a password here. */
       for (int i = 0; i < argc; i++) SecureZeroMemory(argv[i], _tcslen(argv[i]) * sizeof(TCHAR));
       nssm_exit(ret);
@@ -293,7 +324,7 @@ int _tmain(int argc, TCHAR **argv) {
     if (str_equiv(argv[1], _T("list"))) nssm_exit(list_nssm_services(argc - 2, argv + 2));
     if (str_equiv(argv[1], _T("processes"))) nssm_exit(service_process_tree(argc - 2, argv + 2));
     if (str_equiv(argv[1], _T("remove"))) {
-      if (! is_admin) nssm_exit(elevate(argc, argv, NSSM_MESSAGE_NOT_ADMINISTRATOR_CANNOT_REMOVE));
+      if (! isAdmin()) nssm_exit(elevate(argc, argv, NSSM_MESSAGE_NOT_ADMINISTRATOR_CANNOT_REMOVE));
       nssm_exit(pre_remove_service(argc - 2, argv + 2));
     }
   }
@@ -302,7 +333,7 @@ int _tmain(int argc, TCHAR **argv) {
   tls_index = TlsAlloc();
 
   /* Register messages */
-  if (is_admin) create_messages();
+  if (isAdmin()) create_messages();
 
   /*
     Optimisation for Windows 2000:

@@ -1,28 +1,35 @@
 #include "nssm.h"
 
-/* See if we were launched from a console window. */
-bool check_console() {
-  /* If we're running in a service context there will be no console window. */
-  HWND console = GetConsoleWindow();
-  if (! console) return false;
 
-  unsigned long pid;
-  if (! GetWindowThreadProcessId(console, &pid)) return false;
+namespace nssm {
 
-  /*
-    If the process associated with the console window handle is the same as
-    this process, we were not launched from an existing console.  The user
-    probably double-clicked our executable.
-  */
-  if (GetCurrentProcessId() != pid) return true;
+    /* See if we were launched from a console window. */
+    bool check_console() {
+        bool cons{false};
+        //If we're running in a service context there will be no console window.
+        const auto console{GetConsoleWindow()};
+        if (console) {
+            DWORD pid{0};
+            if (!GetWindowThreadProcessId(console, &pid)) {
+                throw wexception{L"Error getting window thread process ID. Error: " + getLastErrorMsg()};
+            }
 
-  /* We close our new console so that subsequent messages appear in a popup. */
-  FreeConsole();
-  return false;
-}
+            if (GetCurrentProcessId() != pid) {
+                // If the process and window handle are different, programmed launched from within console.
+                cons = true;
+            } else {
+                // If the process associated with the console window handle is the same as this process, we were not
+                // launched from an existing console.  The user probably double-clicked our executable. Close the
+                // new console so that messages open in pop-ups.
+                FreeConsole();
+            }
+        }
+        return cons;
+    }
 
-void alloc_console(nssm_service_t *service) {
-  if (service->no_console) return;
-
-  AllocConsole();
-}
+    void alloc_console(const nssm_service_t &service) {
+        if (service.no_console == 0U) {
+            AllocConsole();
+        }
+    }
+} // namespace nssm

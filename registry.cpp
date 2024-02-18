@@ -1,5 +1,5 @@
 #include "nssm.h"
-
+#include <cstdint>
 extern const TCHAR *exit_action_strings[];
 
 static int service_registry_path(const TCHAR *service_name, bool parameters, const TCHAR *sub, TCHAR *buffer, unsigned long buflen) {
@@ -789,7 +789,7 @@ int get_parameters(nssm_service_t *service, STARTUPINFO *si) {
     DWORD_PTR affinity, system_affinity;
 
     if (GetProcessAffinityMask(GetCurrentProcess(), &affinity, &system_affinity)) {
-      _int64 effective_affinity = service->affinity & system_affinity;
+      std::int64_t effective_affinity = service->affinity & system_affinity;
       if (effective_affinity != service->affinity) {
         TCHAR *system = 0;
         if (! affinity_mask_to_string(system_affinity, &system)) {

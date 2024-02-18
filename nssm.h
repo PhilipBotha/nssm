@@ -32,7 +32,9 @@
 #endif
 #define DIR_LENGTH PATH_LENGTH - 12
 
-#define _WIN32_WINNT 0x0500
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0A00
+#endif
 
 #define APSTUDIO_HIDDEN_SYMBOLS
 #include <windows.h>
@@ -44,8 +46,8 @@
 #include <fcntl.h>
 #include <io.h>
 #include <shlwapi.h>
-#include <stdarg.h>
-#include <stdio.h>
+#include <cstdarg>
+#include <cstdio>
 #include "utf8.h"
 #include "service.h"
 #include "account.h"
@@ -62,18 +64,39 @@
 #include "gui.h"
 #endif
 
+#include <string>
+#include <cstdint>
+
 void nssm_exit(int);
 int str_equiv(const TCHAR *, const TCHAR *);
 int quote(const TCHAR *, TCHAR *, size_t);
 void strip_basename(TCHAR *);
 int str_number(const TCHAR *, unsigned long *, TCHAR **);
 int str_number(const TCHAR *, unsigned long *);
-int num_cpus();
 int usage(int);
 const TCHAR *nssm_unquoted_imagepath();
 const TCHAR *nssm_imagepath();
 const TCHAR *nssm_exe();
 
+
+namespace nssm {
+    [[nodiscard]] std::wstring getLastErrorMsg();
+    [[nodiscard]] bool isAdmin();
+    [[nodiscard]] std::uint16_t num_cpus();
+
+    class wexception : public std::exception {
+    public:
+        wexception(std::wstring aMsg) : msg(std::move(aMsg)) {}
+
+        [[nodiscard]] const char *what() const noexcept override {
+            return reinterpret_cast<const char *>(msg.c_str());
+        }
+
+    private:
+        std::wstring msg;
+    };
+}
+using namespace nssm;
 #define NSSM _T("NSSM")
 #ifdef _WIN64
 #define NSSM_ARCHITECTURE _T("64-bit")
