@@ -74,6 +74,8 @@ namespace nssm {
     }
 
     [[nodiscard]] std::wstring getLastErrorMsg();
+
+    [[nodiscard]] std::wstring toLower(const std::wstring &input);
 }
 
 #endif //NSSM_HELPER_H

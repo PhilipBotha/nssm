@@ -1291,7 +1291,9 @@ int edit_service(nssm_service_t *service, bool editing) {
   }
 
   /* Display name. */
-  if (! service->displayname[0]) _sntprintf_s(service->displayname, _countof(service->displayname), _TRUNCATE, _T("%s"), service->name);
+  if (! service->displayname[0]) {
+      _sntprintf_s(service->displayname, _countof(service->displayname), _TRUNCATE, _T("%s"), service->name);
+  }
 
   /*
     Username must be NULL if we aren't changing or an account name.
@@ -1315,17 +1317,27 @@ int edit_service(nssm_service_t *service, bool editing) {
       memmove(canon, username, (service->usernamelen + 1) * sizeof(TCHAR));
     }
     else {
-      if (canonicalise_username(username, &canon)) return 5;
-      if (service->passwordlen) password = service->password;
+      if (canonicalise_username(username, &canon)) {
+          return 5;
+      }
+      if (service->passwordlen) {
+          password = service->password;
+      }
     }
   }
-  else if (editing) username = canon = NSSM_LOCALSYSTEM_ACCOUNT;
+  else if (editing) {
+      username = canon = NSSM_LOCALSYSTEM_ACCOUNT;
+  }
 
   if (! virtual_account) {
-    if (well_known_username(canon)) password = _T("");
+    if (well_known_username(canon)) {
+        password = _T("");
+    }
     else {
       if (grant_logon_as_service(canon)) {
-        if (canon != username) HeapFree(GetProcessHeap(), 0, canon);
+        if (canon != username) {
+            HeapFree(GetProcessHeap(), 0, canon);
+        }
         print_message(stderr, NSSM_MESSAGE_GRANT_LOGON_AS_SERVICE_FAILED, username);
         return 5;
       }
@@ -1333,17 +1345,25 @@ int edit_service(nssm_service_t *service, bool editing) {
   }
 
   TCHAR *dependencies = _T("");
-  if (service->dependencieslen) dependencies = 0; /* Change later. */
+  if (service->dependencieslen) {
+      dependencies = 0; /* Change later. */
+  }
 
   if (! ChangeServiceConfig(service->handle, service->type, startup, SERVICE_NO_CHANGE, 0, 0, 0, dependencies, canon, password, service->displayname)) {
-    if (canon != username) HeapFree(GetProcessHeap(), 0, canon);
+    if (canon != username) {
+        HeapFree(GetProcessHeap(), 0, canon);
+    }
     print_message(stderr, NSSM_MESSAGE_CHANGESERVICECONFIG_FAILED, error_string(GetLastError()));
     return 5;
   }
-  if (canon != username) HeapFree(GetProcessHeap(), 0, canon);
+  if (canon != username) {
+      HeapFree(GetProcessHeap(), 0, canon);
+  }
 
   if (service->dependencieslen) {
-    if (set_service_dependencies(service->name, service->handle, service->dependencies)) return 5;
+    if (set_service_dependencies(service->name, service->handle, service->dependencies)) {
+        return 5;
+    }
   }
 
   if (service->description[0] || editing) {
@@ -1352,8 +1372,12 @@ int edit_service(nssm_service_t *service, bool editing) {
 
   SERVICE_DELAYED_AUTO_START_INFO delayed;
   ZeroMemory(&delayed, sizeof(delayed));
-  if (service->startup == NSSM_STARTUP_DELAYED) delayed.fDelayedAutostart = 1;
-  else delayed.fDelayedAutostart = 0;
+  if (service->startup == NSSM_STARTUP_DELAYED) {
+      delayed.fDelayedAutostart = 1;
+  }
+  else {
+      delayed.fDelayedAutostart = 0;
+  }
   /* Delayed startup isn't supported until Vista. */
   if (! ChangeServiceConfig2(service->handle, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, &delayed)) {
     unsigned long error = GetLastError();

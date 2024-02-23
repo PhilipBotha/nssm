@@ -4,7 +4,7 @@
 #include "helper.hpp"
 #include <format>
 #include <stdexcept>
-
+#include <algorithm>
 namespace nssm {
 
     [[nodiscard]] std::vector<TCHAR> getVec(const TCHAR *const apNullTermString) {
@@ -27,5 +27,13 @@ namespace nssm {
         std::wstring error_message{buffer};
         LocalFree(buffer);
         return error_message;
+    }
+
+    [[nodiscard]] std::wstring toLower(const std::wstring &input) {
+        std::wstring output{};
+        output.reserve(input.size());
+        std::transform(std::cbegin(input), std::cend(input), std::begin(output),
+                       [](const wchar_t c) { return std::towlower(c); });
+        return output;
     }
 } // namespace nssm

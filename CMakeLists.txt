@@ -62,7 +62,9 @@ set(SOURCES account.cpp console.cpp env.cpp event.cpp gui.cpp hook.cpp imports.c
 
 )
 
-set(SOURCES2 src/helper.cpp src/console.cpp
+set(SOURCES2 src/helper.cpp
+        src/console.cpp
+        src/account.cpp
         src/nssm.cpp
         src/imports.cpp
         src/service.cpp

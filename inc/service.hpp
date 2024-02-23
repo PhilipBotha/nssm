@@ -10,7 +10,7 @@
 #include <filesystem>
 #include <span>
 #include <windows.h>
-
+#include "nssm.hpp"
 namespace nssm {
 
     constexpr std::size_t STDIN_SHARING{FILE_SHARE_WRITE};
@@ -77,9 +77,9 @@ namespace nssm {
         std::wstring name{};
         std::wstring displayname{};
         std::wstring description{};
-        unsigned long startup;
+        Startup startup;
         std::wstring username{};
-        std::wstring password;
+        std::wstring password{};
         unsigned long type{SERVICE_WIN32_OWN_PROCESS};
         std::wstring image{};
         std::wstring exe{};
@@ -131,7 +131,7 @@ namespace nssm {
         unsigned long kill_window_delay{KILL_WINDOW_GRACE_PERIOD};
         unsigned long kill_threads_delay{KILL_THREADS_GRACE_PERIOD};
         bool kill_process_tree{true};
-        SC_HANDLE handle;
+        SC_HANDLE handle{nullptr};
         SERVICE_STATUS status;
         SERVICE_STATUS_HANDLE status_handle;
         HANDLE process_handle;
@@ -162,6 +162,8 @@ namespace nssm {
                              const std::span<const std::wstring> &args);
 
     void install_service(Service_t &service);
+
+    [[nodiscard]] std::wstring nssm_imagepath();
 } // namespace nssm
 
 #endif //NSSM_SERVICE_HPP
